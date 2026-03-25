@@ -1,0 +1,62 @@
+<!-- admin/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarkUX Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="card login-card">
+      <h2>MarkUX</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" required>
+        </div>
+        <div id="error" class="error-msg" style="display:none"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { getSupabase } from './js/supabase-client.js';
+    import { signIn, getSession } from './js/auth.js';
+
+    // Redirect if already logged in
+    const session = await getSession();
+    if (session) {
+      window.location.href = 'projects.html';
+    }
+
+    const form = document.getElementById('login-form');
+    const errorEl = document.getElementById('error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.style.display = 'none';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        await signIn(email, password);
+        window.location.href = 'projects.html';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
