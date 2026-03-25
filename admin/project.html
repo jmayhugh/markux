@@ -1,0 +1,229 @@
+<!-- admin/project.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project — MarkUX Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="header">
+    <h1><a href="projects.html" style="color:inherit;text-decoration:none">MarkUX</a></h1>
+    <div class="header-actions">
+      <button id="snippet-btn" class="btn btn-secondary">Embed Snippet</button>
+      <button id="export-btn" class="btn btn-secondary">Export CSV</button>
+      <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="flex justify-between items-center mb-4 mt-4">
+      <h2 id="project-name"></h2>
+      <div class="flex gap-2">
+        <button id="list-view-btn" class="btn btn-sm btn-primary">List</button>
+        <button id="visual-view-btn" class="btn btn-sm btn-secondary">Visual Replay</button>
+      </div>
+    </div>
+
+    <div class="filters" id="filters">
+      <select id="filter-status">
+        <option value="">All statuses</option>
+        <option value="open">Open</option>
+        <option value="resolved">Resolved</option>
+      </select>
+      <select id="filter-page"><option value="">All pages</option></select>
+      <input id="filter-author" type="text" placeholder="Filter by author...">
+    </div>
+
+    <div id="list-view" class="card">
+      <table class="table">
+        <thead>
+          <tr><th>Page</th><th>Author</th><th>Comment</th><th>Status</th><th>Date</th><th></th></tr>
+        </thead>
+        <tbody id="annotations-body"></tbody>
+      </table>
+      <div id="list-empty" class="empty-state" style="display:none">No annotations yet.</div>
+    </div>
+
+    <div id="visual-view" style="display:none">
+      <div id="replay-content"></div>
+    </div>
+
+    <div id="thread-panel" style="display:none" class="card mt-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3>Thread</h3>
+        <button id="close-thread" class="btn btn-sm btn-secondary">Close</button>
+      </div>
+      <div id="thread-content"></div>
+    </div>
+  </div>
+
+  <!-- Snippet Modal -->
+  <div id="snippet-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h3>Embed Snippet</h3>
+      <div id="snippet-content"></div>
+      <button id="close-snippet" class="btn btn-secondary mt-4">Close</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { requireAuth, signOut } from './js/auth.js';
+    import { getSupabaseUrl } from './js/supabase-client.js';
+    import {
+      loadProject, loadAnnotations, loadReplies,
+      updateAnnotationStatus, getPageUrls, renderAnnotationRow
+    } from './js/project-detail.js';
+    import { renderVisualReplay } from './js/visual-replay.js';
+    import { exportCsv } from './js/csv-export.js';
+    import { renderSnippet } from './js/embed-snippet.js';
+
+    const session = await requireAuth();
+    if (!session) throw new Error('Not authenticated');
+
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get('id');
+    if (!projectId) { window.location.href = 'projects.html'; throw new Error('No project ID'); }
+
+    const project = await loadProject(projectId);
+    document.getElementById('project-name').textContent = project.name;
+    document.getElementById('logout-btn').addEventListener('click', signOut);
+
+    // View toggle
+    const listView = document.getElementById('list-view');
+    const visualView = document.getElementById('visual-view');
+    const listBtn = document.getElementById('list-view-btn');
+    const visualBtn = document.getElementById('visual-view-btn');
+
+    listBtn.addEventListener('click', () => {
+      listView.style.display = 'block'; visualView.style.display = 'none';
+      listBtn.className = 'btn btn-sm btn-primary'; visualBtn.className = 'btn btn-sm btn-secondary';
+    });
+
+    visualBtn.addEventListener('click', async () => {
+      listView.style.display = 'none'; visualView.style.display = 'block';
+      listBtn.className = 'btn btn-sm btn-secondary'; visualBtn.className = 'btn btn-sm btn-primary';
+      const annotations = await loadAnnotations(projectId);
+      renderVisualReplay(document.getElementById('replay-content'), annotations, getSupabaseUrl());
+    });
+
+    // Populate page URL filter
+    const pageUrls = await getPageUrls(projectId);
+    const pageSelect = document.getElementById('filter-page');
+    pageUrls.forEach(url => {
+      const opt = document.createElement('option');
+      opt.value = url;
+      opt.textContent = url.replace(/^https?:\/\/[^/]+/, '');
+      pageSelect.appendChild(opt);
+    });
+
+    // Render annotations
+    const tbody = document.getElementById('annotations-body');
+    const listEmpty = document.getElementById('list-empty');
+    const threadPanel = document.getElementById('thread-panel');
+    const threadContent = document.getElementById('thread-content');
+
+    async function render() {
+      const filters = {
+        status: document.getElementById('filter-status').value,
+        pageUrl: document.getElementById('filter-page').value,
+        author: document.getElementById('filter-author').value,
+      };
+      const annotations = await loadAnnotations(projectId, filters);
+      tbody.replaceChildren();
+      if (annotations.length === 0) {
+        listEmpty.style.display = 'block';
+      } else {
+        listEmpty.style.display = 'none';
+        annotations.forEach(a => {
+          tbody.appendChild(renderAnnotationRow(a, expandThread, async (id, status) => {
+            await updateAnnotationStatus(id, status);
+            await render();
+          }));
+        });
+      }
+    }
+
+    async function expandThread(annotation) {
+      threadPanel.style.display = 'block';
+      const replies = await loadReplies(annotation.id);
+      threadContent.replaceChildren();
+
+      // Original annotation
+      const annDiv = document.createElement('div');
+      annDiv.style.marginBottom = '12px';
+      const annAuthor = document.createElement('strong');
+      annAuthor.textContent = annotation.author_name;
+      const annEmail = document.createElement('span');
+      annEmail.className = 'text-muted';
+      annEmail.style.marginLeft = '8px';
+      annEmail.textContent = annotation.author_email;
+      const annBody = document.createElement('p');
+      annBody.style.marginTop = '4px';
+      annBody.textContent = annotation.comment;
+      const annDate = document.createElement('small');
+      annDate.className = 'text-muted';
+      annDate.textContent = new Date(annotation.created_at).toLocaleString();
+      annDiv.appendChild(annAuthor);
+      annDiv.appendChild(annEmail);
+      annDiv.appendChild(annBody);
+      annDiv.appendChild(annDate);
+      threadContent.appendChild(annDiv);
+
+      // Separator
+      const hr = document.createElement('hr');
+      hr.style.cssText = 'border:none;border-top:1px solid #e5e7eb;margin:12px 0';
+      threadContent.appendChild(hr);
+
+      // Replies
+      replies.forEach(r => {
+        const replyDiv = document.createElement('div');
+        replyDiv.style.cssText = 'margin-bottom:12px;padding-left:16px;border-left:2px solid #e5e7eb';
+        const rAuthor = document.createElement('strong');
+        rAuthor.textContent = r.author_name;
+        const rEmail = document.createElement('span');
+        rEmail.className = 'text-muted';
+        rEmail.style.marginLeft = '8px';
+        rEmail.textContent = r.author_email;
+        const rBody = document.createElement('p');
+        rBody.style.marginTop = '4px';
+        rBody.textContent = r.body;
+        const rDate = document.createElement('small');
+        rDate.className = 'text-muted';
+        rDate.textContent = new Date(r.created_at).toLocaleString();
+        replyDiv.appendChild(rAuthor);
+        replyDiv.appendChild(rEmail);
+        replyDiv.appendChild(rBody);
+        replyDiv.appendChild(rDate);
+        threadContent.appendChild(replyDiv);
+      });
+    }
+
+    document.getElementById('close-thread').addEventListener('click', () => {
+      threadPanel.style.display = 'none';
+    });
+
+    // Filters
+    ['filter-status', 'filter-page', 'filter-author'].forEach(id => {
+      document.getElementById(id).addEventListener('change', render);
+      document.getElementById(id).addEventListener('input', render);
+    });
+
+    // Export
+    document.getElementById('export-btn').addEventListener('click', () => exportCsv(projectId, project.name));
+
+    // Snippet
+    document.getElementById('snippet-btn').addEventListener('click', () => {
+      document.getElementById('snippet-modal').style.display = 'flex';
+      renderSnippet(document.getElementById('snippet-content'), project);
+    });
+    document.getElementById('close-snippet').addEventListener('click', () => {
+      document.getElementById('snippet-modal').style.display = 'none';
+    });
+
+    await render();
+  </script>
+</body>
+</html>
