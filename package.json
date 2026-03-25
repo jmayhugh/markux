@@ -1,0 +1,21 @@
+{
+  "name": "markux",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "dev": "node esbuild.config.js --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "vitest": "^3.1.0",
+    "jsdom": "^26.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "html2canvas": "^1.4.1"
+  }
+}
