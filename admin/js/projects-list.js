@@ -2,7 +2,7 @@
 import { getSupabase } from "./supabase-client.js";
 
 export async function loadProjects() {
-  const supabase = await getSupabase();
+  const supabase = getSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -38,7 +38,7 @@ export async function loadProjects() {
 }
 
 export async function createProject(name, domains) {
-  const supabase = await getSupabase();
+  const supabase = getSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
