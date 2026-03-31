@@ -1,8 +1,8 @@
 // admin/js/supabase-client.js
 
 // Loaded via CDN import map in HTML
-const SUPABASE_URL = "__SUPABASE_URL__"; // Replace with actual URL
-const SUPABASE_ANON_KEY = "__SUPABASE_ANON_KEY__"; // Replace with actual key
+const SUPABASE_URL = "https://fcqywjpdjcsbcpnnfckw.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_bcQeMDWPM4AHj-43w2HtYg_78Lg55Pl";
 
 let _supabase = null;
 

@@ -43,9 +43,9 @@ import { subscribeToAnnotations } from "./realtime.js";
 
   // Supabase config — these are embedded at build time or read from data attributes
   const supabaseUrl =
-    scriptTag.getAttribute("data-supabase-url") || "__SUPABASE_URL__";
+    scriptTag.getAttribute("data-supabase-url") || "https://fcqywjpdjcsbcpnnfckw.supabase.co";
   const supabaseAnonKey =
-    scriptTag.getAttribute("data-supabase-anon-key") || "__SUPABASE_ANON_KEY__";
+    scriptTag.getAttribute("data-supabase-anon-key") || "sb_publishable_bcQeMDWPM4AHj-43w2HtYg_78Lg55Pl";
   const edgeFunctionUrl = `${supabaseUrl}/functions/v1/write-proxy`;
 
   const pageUrl = normalizeUrl(window.location.href);
