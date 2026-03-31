@@ -40,7 +40,6 @@
       const session = await getSession();
       if (session) {
         window.location.href = 'projects.html';
-        return;
       }
     } catch (e) {
       console.warn('Session check failed:', e);
