@@ -2,7 +2,7 @@
 import { getSupabase } from "./supabase-client.js";
 
 export async function exportCsv(projectId, projectName) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
 
   // Fetch all annotations with their replies
   const { data: annotations, error } = await supabase

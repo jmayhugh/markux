@@ -2,7 +2,7 @@
 import { getSupabase } from "./supabase-client.js";
 
 export async function loadProject(projectId) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -13,7 +13,7 @@ export async function loadProject(projectId) {
 }
 
 export async function loadAnnotations(projectId, filters = {}) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   let query = supabase
     .from("annotations")
     .select("*")
@@ -36,7 +36,7 @@ export async function loadAnnotations(projectId, filters = {}) {
 }
 
 export async function loadReplies(annotationId) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("replies")
     .select("*")
@@ -47,7 +47,7 @@ export async function loadReplies(annotationId) {
 }
 
 export async function updateAnnotationStatus(annotationId, status) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const { error } = await supabase
     .from("annotations")
     .update({ status })
@@ -56,7 +56,7 @@ export async function updateAnnotationStatus(annotationId, status) {
 }
 
 export async function getPageUrls(projectId) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const { data, error } = await supabase
     .from("annotations")
     .select("page_url")

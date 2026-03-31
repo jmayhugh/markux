@@ -2,7 +2,7 @@
 import { getSupabase } from "./supabase-client.js";
 
 export async function signIn(email, password) {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -12,13 +12,13 @@ export async function signIn(email, password) {
 }
 
 export async function signOut() {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   await supabase.auth.signOut();
   window.location.href = "index.html";
 }
 
 export async function getSession() {
-  const supabase = getSupabase();
+  const supabase = await getSupabase();
   const {
     data: { session },
   } = await supabase.auth.getSession();
