@@ -12,6 +12,27 @@ export async function loadProject(projectId) {
   return data;
 }
 
+export async function updateProject(projectId, updates) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("projects")
+    .update(updates)
+    .eq("id", projectId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteProject(projectId) {
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId);
+  if (error) throw error;
+}
+
 export async function loadAnnotations(projectId, filters = {}) {
   const supabase = getSupabase();
   let query = supabase
