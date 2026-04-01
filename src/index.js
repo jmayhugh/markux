@@ -9,7 +9,7 @@ import {
   clearAnnotations,
   setAnnotationMode,
 } from "./state.js";
-import { createAnnotation, createReply, uploadScreenshot } from "./api.js";
+import { createAnnotation, createReply, uploadScreenshot, setApiKey } from "./api.js";
 import { captureScreenshot } from "./screenshot.js";
 import { STYLES } from "./ui/styles.js";
 import { createFloatingButton, updateBadge } from "./ui/floating-button.js";
@@ -45,12 +45,13 @@ import { subscribeToAnnotations } from "./realtime.js";
   const supabaseUrl =
     scriptTag.getAttribute("data-supabase-url") || "https://fcqywjpdjcsbcpnnfckw.supabase.co";
   const supabaseAnonKey =
-    scriptTag.getAttribute("data-supabase-anon-key") || "sb_publishable_bcQeMDWPM4AHj-43w2HtYg_78Lg55Pl";
+    scriptTag.getAttribute("data-supabase-anon-key") || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjcXl3anBkamNzYmNwbm5mY2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5OTE2MzUsImV4cCI6MjA5MDU2NzYzNX0.J4QYy5N_rPiRN0NF9TAQU119QOnDjIm8W73jUDpi3c8";
   const edgeFunctionUrl = `${supabaseUrl}/functions/v1/write-proxy`;
 
   const pageUrl = normalizeUrl(window.location.href);
 
   function init() {
+    setApiKey(supabaseAnonKey);
     const supabase = initSupabase(supabaseUrl, supabaseAnonKey);
 
     // Create shadow DOM container
