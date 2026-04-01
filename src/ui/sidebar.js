@@ -74,7 +74,7 @@ export function updateSidebarBadge(sidebar, count) {
   badge.style.display = count > 0 ? "flex" : "none";
 }
 
-export function updateSidebarList(sidebar, annotations, { loadReplies, onReply }) {
+export function updateSidebarList(sidebar, annotations, { loadReplies, onReply, onDelete, onStatusChange }) {
   const list = sidebar._list;
   const onSelect = sidebar._onSelect;
 
@@ -121,20 +121,53 @@ export function updateSidebarList(sidebar, annotations, { loadReplies, onReply }
     comment.className = "markux-sidebar-item-comment";
     comment.textContent = annotation.comment;
 
-    // Reply count
+    // Reply count (separate element, outside clamped comment)
+    const replyCountEl = document.createElement("div");
+    replyCountEl.className = "markux-sidebar-item-replies";
     if (annotation._replyCount > 0) {
-      const replyCount = document.createElement("span");
-      replyCount.className = "markux-sidebar-item-replies";
-      replyCount.textContent = `${annotation._replyCount} ${annotation._replyCount === 1 ? "reply" : "replies"}`;
-      comment.appendChild(replyCount);
+      replyCountEl.textContent = `${annotation._replyCount} ${annotation._replyCount === 1 ? "reply" : "replies"}`;
     }
 
     // Expandable thread area
     const threadArea = document.createElement("div");
     threadArea.className = "markux-sidebar-thread";
 
+    // Action buttons row
+    const actions = document.createElement("div");
+    actions.className = "markux-sidebar-item-actions";
+
+    // Status toggle
+    const statusBtn = document.createElement("button");
+    statusBtn.className = "markux-sidebar-item-status-btn";
+    statusBtn.textContent = annotation.status === "open" ? "Resolve" : "Reopen";
+    statusBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      statusBtn.disabled = true;
+      const newStatus = annotation.status === "open" ? "resolved" : "open";
+      await onStatusChange(annotation, newStatus);
+    });
+    actions.appendChild(statusBtn);
+
+    // Delete button — only if current user is the author
+    const identity = getSavedIdentity();
+    if (identity && identity.email === annotation.author_email) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "markux-sidebar-item-delete";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm("Delete this comment?")) return;
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = "Deleting...";
+        await onDelete(annotation);
+      });
+      actions.appendChild(deleteBtn);
+    }
+
     item.appendChild(itemHeader);
     item.appendChild(comment);
+    item.appendChild(replyCountEl);
+    item.appendChild(actions);
     item.appendChild(threadArea);
 
     item.addEventListener("click", async (e) => {
@@ -165,6 +198,18 @@ export function updateSidebarList(sidebar, annotations, { loadReplies, onReply }
 
 function renderThread(container, annotation, replies, onReply, loadReplies) {
   container.replaceChildren();
+
+  // Update reply count on the parent item
+  annotation._replyCount = replies.length;
+  const item = container.closest(".markux-sidebar-item");
+  if (item) {
+    const countEl = item.querySelector(".markux-sidebar-item-replies");
+    if (countEl) {
+      countEl.textContent = replies.length > 0
+        ? `${replies.length} ${replies.length === 1 ? "reply" : "replies"}`
+        : "";
+    }
+  }
 
   // Replies list
   if (replies.length > 0) {

@@ -9,7 +9,7 @@ import {
   clearAnnotations,
   setAnnotationMode,
 } from "./state.js";
-import { createAnnotation, createReply, uploadScreenshot, setApiKey } from "./api.js";
+import { createAnnotation, createReply, deleteAnnotation, updateAnnotationStatus, uploadScreenshot, setApiKey } from "./api.js";
 import { captureScreenshot } from "./screenshot.js";
 import { STYLES } from "./ui/styles.js";
 import { createFloatingButton } from "./ui/floating-button.js";
@@ -95,6 +95,7 @@ import { subscribeToAnnotations } from "./realtime.js";
 
     let cleanupHighlighting = null;
     let currentPopover = null;
+    let pendingPin = null;
     let highlightedPin = null;
 
     function handleSidebarSelect(annotation, index) {
@@ -140,6 +141,10 @@ import { subscribeToAnnotations } from "./realtime.js";
         currentPopover.remove();
         currentPopover = null;
       }
+      if (pendingPin) {
+        pendingPin.remove();
+        pendingPin = null;
+      }
     }
 
     function handleOverlayClick(e) {
@@ -154,9 +159,10 @@ import { subscribeToAnnotations } from "./realtime.js";
       const { pinX, pinY } = calculatePinPosition(target, e.clientX, e.clientY);
       const pinNumber = getAnnotations().length + 1;
 
-      // Create pin at click position
+      // Create pin at click position (pending until comment is submitted)
       const pin = createPinMarker(pinNumber, e.clientX, e.clientY, () => {});
       pinContainer.appendChild(pin);
+      pendingPin = pin;
 
       // Show comment form
       const popover = createCommentPopover(
@@ -199,6 +205,8 @@ import { subscribeToAnnotations } from "./realtime.js";
               });
             }
 
+            pendingPin = null; // Pin is now committed
+            annotation._replyCount = 0;
             addAnnotation(annotation);
             updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status === "open").length);
             updateSidebarList(sidebar, getAnnotations().filter((a) => a.status === "open"), sidebarCallbacks);
@@ -219,7 +227,6 @@ import { subscribeToAnnotations } from "./realtime.js";
         },
         () => {
           closePopover();
-          pin.remove();
         },
       );
 
@@ -281,7 +288,17 @@ import { subscribeToAnnotations } from "./realtime.js";
       });
     }
 
-    const sidebarCallbacks = { loadReplies: loadRepliesForAnnotation, onReply: handleSidebarReply };
+    async function handleSidebarDelete(annotation) {
+      await deleteAnnotation(edgeFunctionUrl, projectId, annotation.id, annotation.author_email);
+      await loadAnnotations();
+    }
+
+    async function handleSidebarStatusChange(annotation, newStatus) {
+      await updateAnnotationStatus(edgeFunctionUrl, projectId, annotation.id, newStatus);
+      await loadAnnotations();
+    }
+
+    const sidebarCallbacks = { loadReplies: loadRepliesForAnnotation, onReply: handleSidebarReply, onDelete: handleSidebarDelete, onStatusChange: handleSidebarStatusChange };
 
     // Load existing annotations for this page
     async function loadAnnotations() {
@@ -290,7 +307,6 @@ import { subscribeToAnnotations } from "./realtime.js";
         .select("*")
         .eq("project_id", projectId)
         .eq("page_url", pageUrl)
-        .eq("status", "open")
         .order("created_at", { ascending: true });
 
       if (error) {
@@ -304,8 +320,11 @@ import { subscribeToAnnotations } from "./realtime.js";
         pinContainer.removeChild(pinContainer.firstChild);
       }
 
-      // Fetch reply counts for all annotations
-      const annotations = data || [];
+      // Sort: open first, resolved at bottom
+      const annotations = (data || []).sort((a, b) => {
+        if (a.status === b.status) return 0;
+        return a.status === "open" ? -1 : 1;
+      });
       if (annotations.length > 0) {
         const ids = annotations.map((a) => a.id);
         const { data: replyCounts } = await supabase
@@ -322,20 +341,25 @@ import { subscribeToAnnotations } from "./realtime.js";
       annotations.forEach((annotation, index) => {
         addAnnotation(annotation);
 
-        const { x, y } = restorePinPosition(
+        let { x, y } = restorePinPosition(
           annotation.pin_selector,
           annotation.pin_x,
           annotation.pin_y,
         );
 
+        // Clamp to viewport so pins don't go off-screen
+        x = Math.max(20, Math.min(x, window.innerWidth - 20));
+        y = Math.max(20, Math.min(y, window.innerHeight - 20));
+
         const pin = createPinMarker(index + 1, x, y, () =>
           showThread(annotation, pin),
           annotation.author_name,
+          annotation.status,
         );
         pinContainer.appendChild(pin);
       });
 
-      updateSidebarBadge(sidebar, annotations.length);
+      updateSidebarBadge(sidebar, annotations.filter((a) => a.status === "open").length);
       updateSidebarList(sidebar, annotations, sidebarCallbacks);
     }
 
@@ -374,22 +398,7 @@ import { subscribeToAnnotations } from "./realtime.js";
       subscribeToAnnotations(projectId, {
         onInsert: (ann) => {
           if (ann.page_url !== pageUrl) return;
-          addAnnotation(ann);
-          const { x, y } = restorePinPosition(
-            ann.pin_selector,
-            ann.pin_x,
-            ann.pin_y,
-          );
-          const pin = createPinMarker(
-            getAnnotations().length,
-            x,
-            y,
-            () => showThread(ann, pin),
-            ann.author_name,
-          );
-          pinContainer.appendChild(pin);
-          updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status === "open").length);
-          updateSidebarList(sidebar, getAnnotations().filter((a) => a.status === "open"), sidebarCallbacks);
+          loadAnnotations();
         },
         onUpdate: () => loadAnnotations(),
         onDelete: () => loadAnnotations(),

@@ -30,6 +30,14 @@ export async function createReply(edgeFunctionUrl, projectId, data) {
   return callEdgeFunction(edgeFunctionUrl, { action: "create_reply", project_id: projectId, data });
 }
 
+export async function updateAnnotationStatus(edgeFunctionUrl, projectId, annotationId, status) {
+  return callEdgeFunction(edgeFunctionUrl, { action: "update_annotation_status", project_id: projectId, data: { annotation_id: annotationId, status } });
+}
+
+export async function deleteAnnotation(edgeFunctionUrl, projectId, annotationId, authorEmail) {
+  return callEdgeFunction(edgeFunctionUrl, { action: "delete_annotation", project_id: projectId, data: { annotation_id: annotationId, author_email: authorEmail } });
+}
+
 export async function uploadScreenshot(edgeFunctionUrl, projectId, path, base64) {
   return callEdgeFunction(edgeFunctionUrl, { action: "upload_screenshot", project_id: projectId, data: { path, base64 } });
 }

@@ -150,6 +150,60 @@ serve(async (req) => {
         .single();
       if (error) throw error;
       result = reply;
+    } else if (action === "delete_annotation") {
+      // Verify the annotation belongs to this project and matches the author email
+      const { data: annotation, error: annError } = await supabase
+        .from("annotations")
+        .select("id, author_email")
+        .eq("id", data.annotation_id)
+        .eq("project_id", project_id)
+        .single();
+      if (annError || !annotation) {
+        return new Response(JSON.stringify({ error: "Annotation not found" }), {
+          status: 404,
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+        });
+      }
+      if (annotation.author_email !== data.author_email) {
+        return new Response(JSON.stringify({ error: "You can only delete your own annotations" }), {
+          status: 403,
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+        });
+      }
+      const { error } = await supabase
+        .from("annotations")
+        .delete()
+        .eq("id", data.annotation_id);
+      if (error) throw error;
+      result = { deleted: true };
+    } else if (action === "update_annotation_status") {
+      const { annotation_id, status: newStatus } = data;
+      if (!["open", "resolved"].includes(newStatus)) {
+        return new Response(JSON.stringify({ error: "Invalid status" }), {
+          status: 400,
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+        });
+      }
+      const { data: annotation, error: annError } = await supabase
+        .from("annotations")
+        .select("id")
+        .eq("id", annotation_id)
+        .eq("project_id", project_id)
+        .single();
+      if (annError || !annotation) {
+        return new Response(JSON.stringify({ error: "Annotation not found" }), {
+          status: 404,
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
+        });
+      }
+      const { error, data: updated } = await supabase
+        .from("annotations")
+        .update({ status: newStatus })
+        .eq("id", annotation_id)
+        .select()
+        .single();
+      if (error) throw error;
+      result = updated;
     } else if (action === "upload_screenshot") {
       const { path, base64 } = data;
       const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));

@@ -168,6 +168,10 @@ export const STYLES = `
     border: 2px solid white;
   }
 
+  .markux-pin.markux-pin-resolved {
+    opacity: 0.6;
+  }
+
   .markux-pin.highlighted {
     transform: scale(1.3);
     filter: drop-shadow(0 4px 12px rgba(99,102,241,0.5));
@@ -500,11 +504,61 @@ export const STYLES = `
     font-size: 14px;
   }
 
+  .markux-sidebar-item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    margin-left: 32px;
+  }
+
+  .markux-sidebar-item-status-btn {
+    background: none;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .markux-sidebar-item-status-btn:hover {
+    background: #f3f4f6;
+  }
+
+  .markux-sidebar-item-status-btn:disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .markux-sidebar-item-delete {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+
+  .markux-sidebar-item-delete:hover {
+    background: #fef2f2;
+  }
+
+  .markux-sidebar-item-delete:disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
   .markux-sidebar-item-replies {
-    display: block;
     font-size: 11px;
     color: #6366f1;
     margin-top: 4px;
+    margin-left: 32px;
+  }
+
+  .markux-sidebar-item-replies:empty {
+    display: none;
   }
 
   .markux-sidebar-thread {
