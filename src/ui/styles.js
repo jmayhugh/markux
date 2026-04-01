@@ -75,13 +75,13 @@ export const STYLES = `
   .markux-overlay {
     position: fixed;
     inset: 0;
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23dc2626'%3E%3Cpath d='M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H10l-4 4V4c0-1.1.9-2 2-2z'/%3E%3C/svg%3E") 2 34, crosshair;
     z-index: 2147483646;
     pointer-events: none;
   }
 
   .markux-overlay.active {
     pointer-events: auto;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 24 24' fill='%23dc2626'%3E%3Cpath d='M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H10l-4 4V4c0-1.1.9-2 2-2z'/%3E%3C/svg%3E") 2 34, crosshair;
     border: 1px solid #dc2626;
     box-shadow: inset 0 0 60px rgba(220, 38, 38, 0.5);
   }

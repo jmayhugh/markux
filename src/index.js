@@ -143,6 +143,7 @@ import { subscribeToAnnotations } from "./realtime.js";
     }
 
     function handleOverlayClick(e) {
+      if (!overlay.classList.contains("active")) return;
       closePopover();
       highlight.style.display = "none";
 
