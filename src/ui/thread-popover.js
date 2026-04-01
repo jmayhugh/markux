@@ -1,5 +1,7 @@
 // src/ui/thread-popover.js
 
+import { getSavedIdentity, saveIdentity, createIdentityBar } from "./identity.js";
+
 /**
  * Create a popover showing an existing annotation's comment thread.
  * @param {object} annotation - The annotation record
@@ -61,36 +63,55 @@ export function createThreadPopover(
   const formWrapper = document.createElement("div");
   formWrapper.style.cssText = "border-top: 1px solid #e5e7eb; padding-top: 12px; margin-top: 12px;";
 
-  const savedName = localStorage.getItem("markux-reviewer-name") || "";
-  const savedEmail = localStorage.getItem("markux-reviewer-email") || "";
-
   const form = document.createElement("form");
+  const identity = getSavedIdentity();
 
-  const identityRow = document.createElement("div");
-  identityRow.className = "markux-field";
-  identityRow.style.cssText = "display:flex;gap:8px;";
+  const identityContainer = document.createElement("div");
 
-  const nameInput = document.createElement("input");
-  nameInput.className = "markux-input";
-  nameInput.type = "text";
-  nameInput.name = "name";
-  nameInput.placeholder = "Name";
-  nameInput.value = savedName;
-  nameInput.required = true;
-  nameInput.style.flex = "1";
+  function showBar() {
+    const id = getSavedIdentity();
+    if (!id) return;
+    identityContainer.replaceChildren();
+    identityContainer.appendChild(createIdentityBar(id.name, showFields));
+  }
 
-  const emailInput = document.createElement("input");
-  emailInput.className = "markux-input";
-  emailInput.type = "email";
-  emailInput.name = "email";
-  emailInput.placeholder = "Email";
-  emailInput.value = savedEmail;
-  emailInput.required = true;
-  emailInput.style.flex = "1";
+  function showFields() {
+    identityContainer.replaceChildren();
+    const id = getSavedIdentity();
+    const row = document.createElement("div");
+    row.className = "markux-field";
+    row.style.cssText = "display:flex;gap:8px;";
 
-  identityRow.appendChild(nameInput);
-  identityRow.appendChild(emailInput);
-  form.appendChild(identityRow);
+    const nameInput = document.createElement("input");
+    nameInput.className = "markux-input";
+    nameInput.type = "text";
+    nameInput.name = "name";
+    nameInput.placeholder = "Name";
+    nameInput.value = id ? id.name : "";
+    nameInput.required = true;
+    nameInput.style.flex = "1";
+
+    const emailInput = document.createElement("input");
+    emailInput.className = "markux-input";
+    emailInput.type = "email";
+    emailInput.name = "email";
+    emailInput.placeholder = "Email";
+    emailInput.value = id ? id.email : "";
+    emailInput.required = true;
+    emailInput.style.flex = "1";
+
+    row.appendChild(nameInput);
+    row.appendChild(emailInput);
+    identityContainer.appendChild(row);
+  }
+
+  if (identity) {
+    showBar();
+  } else {
+    showFields();
+  }
+
+  form.appendChild(identityContainer);
 
   const replyRow = document.createElement("div");
   replyRow.className = "markux-field";
@@ -115,14 +136,25 @@ export function createThreadPopover(
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
+
+    let name, email;
+    const nameInput = form.elements.name;
+    const emailInput = form.elements.email;
+
+    if (nameInput && emailInput) {
+      name = nameInput.value.trim();
+      email = emailInput.value.trim();
+    } else {
+      const saved = getSavedIdentity();
+      if (!saved) return;
+      name = saved.name;
+      email = saved.email;
+    }
+
     const replyBody = bodyInput.value.trim();
     if (!name || !email || !replyBody) return;
 
-    localStorage.setItem("markux-reviewer-name", name);
-    localStorage.setItem("markux-reviewer-email", email);
-
+    saveIdentity(name, email);
     onReply({ name, email, body: replyBody });
     bodyInput.value = "";
   });

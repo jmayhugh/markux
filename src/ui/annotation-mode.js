@@ -37,43 +37,8 @@ export function deactivateAnnotationMode(overlay) {
  * @param {HTMLElement} shadowHost - The markux container (to exclude from highlighting)
  */
 export function setupHighlighting(overlay, highlight, shadowHost) {
-  let lastTarget = null;
-
-  const onMouseMove = (e) => {
-    if (!overlay.classList.contains("active")) return;
-
-    // Temporarily disable overlay to find element underneath
-    overlay.style.pointerEvents = "none";
-    const target = document.elementFromPoint(e.clientX, e.clientY);
-    overlay.style.pointerEvents = "auto";
-
-    // Don't highlight our own elements
-    if (!target || target === document.body || shadowHost.contains(target)) {
-      highlight.style.display = "none";
-      lastTarget = null;
-      return;
-    }
-
-    if (target !== lastTarget) {
-      lastTarget = target;
-      const rect = target.getBoundingClientRect();
-      highlight.style.display = "block";
-      highlight.style.left = `${rect.left}px`;
-      highlight.style.top = `${rect.top}px`;
-      highlight.style.width = `${rect.width}px`;
-      highlight.style.height = `${rect.height}px`;
-    }
-  };
-
-  // Store handler reference for cleanup
-  overlay._onMouseMove = onMouseMove;
-  document.addEventListener("mousemove", onMouseMove);
-
-  return () => {
-    document.removeEventListener("mousemove", onMouseMove);
-    highlight.style.display = "none";
-    lastTarget = null;
-  };
+  // Highlighting disabled — kept for element detection on click only
+  return () => {};
 }
 
 /**

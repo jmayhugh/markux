@@ -12,7 +12,7 @@ import {
 import { createAnnotation, createReply, uploadScreenshot, setApiKey } from "./api.js";
 import { captureScreenshot } from "./screenshot.js";
 import { STYLES } from "./ui/styles.js";
-import { createFloatingButton, updateBadge } from "./ui/floating-button.js";
+import { createFloatingButton } from "./ui/floating-button.js";
 import {
   createOverlay,
   createHighlight,
@@ -24,6 +24,7 @@ import {
 import { createPinMarker, updatePinPosition } from "./ui/pin-marker.js";
 import { createCommentPopover } from "./ui/comment-popover.js";
 import { createThreadPopover } from "./ui/thread-popover.js";
+import { createSidebar, updateSidebarList, updateSidebarBadge, openSidebar, closeSidebar } from "./ui/sidebar.js";
 import { subscribeToAnnotations } from "./realtime.js";
 
 (function () {
@@ -74,6 +75,12 @@ import { subscribeToAnnotations } from "./realtime.js";
     shadow.appendChild(overlay);
     shadow.appendChild(fab);
 
+    // Comment mode label
+    const modeLabel = document.createElement("div");
+    modeLabel.className = "markux-mode-label";
+    modeLabel.textContent = "Comment Mode";
+    shadow.appendChild(modeLabel);
+
     // Pin container (within shadow DOM)
     const pinContainer = document.createElement("div");
     shadow.appendChild(pinContainer);
@@ -82,12 +89,40 @@ import { subscribeToAnnotations } from "./realtime.js";
     const popoverContainer = document.createElement("div");
     shadow.appendChild(popoverContainer);
 
+    // Sidebar drawer
+    const sidebar = createSidebar(handleSidebarSelect, () => {});
+    shadow.appendChild(sidebar);
+
     let cleanupHighlighting = null;
     let currentPopover = null;
+    let highlightedPin = null;
+
+    function handleSidebarSelect(annotation, index) {
+      // Clear previous highlight
+      if (highlightedPin) {
+        highlightedPin.classList.remove("highlighted");
+        highlightedPin = null;
+      }
+
+      // Find the matching pin in the container
+      const pins = pinContainer.querySelectorAll(".markux-pin");
+      if (pins[index]) {
+        highlightedPin = pins[index];
+        highlightedPin.classList.add("highlighted");
+        // Scroll into view if needed
+        const rect = highlightedPin.getBoundingClientRect();
+        if (rect.top < 0 || rect.bottom > window.innerHeight) {
+          const pinTop = parseFloat(highlightedPin.style.top);
+          window.scrollTo({ top: pinTop - window.innerHeight / 2, behavior: "smooth" });
+        }
+      }
+    }
 
     function handleToggle(isActive) {
       setAnnotationMode(isActive);
+      modeLabel.classList.toggle("visible", isActive);
       if (isActive) {
+        closeSidebar(sidebar);
         activateAnnotationMode(overlay);
         cleanupHighlighting = setupHighlighting(overlay, highlight, host);
       } else {
@@ -164,10 +199,12 @@ import { subscribeToAnnotations } from "./realtime.js";
             }
 
             addAnnotation(annotation);
-            updateBadge(fab, getAnnotations().filter((a) => a.status === "open").length);
+            updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status === "open").length);
+            updateSidebarList(sidebar, getAnnotations().filter((a) => a.status === "open"), sidebarCallbacks);
 
-            // Update pin click handler to show thread
-            pin.onclick = () => showThread(annotation, pin);
+            // Replace pin with one that has initials
+            const newPin = createPinMarker(pinNumber, parseFloat(pin.style.left), parseFloat(pin.style.top), () => showThread(annotation, newPin), name);
+            pin.replaceWith(newPin);
 
             closePopover();
           } catch (err) {
@@ -225,6 +262,26 @@ import { subscribeToAnnotations } from "./realtime.js";
       popoverContainer.appendChild(popover);
     }
 
+    async function loadRepliesForAnnotation(annotationId) {
+      const { data } = await supabase
+        .from("replies")
+        .select("*")
+        .eq("annotation_id", annotationId)
+        .order("created_at", { ascending: true });
+      return data || [];
+    }
+
+    async function handleSidebarReply(annotation, { name, email, body }) {
+      await createReply(edgeFunctionUrl, projectId, {
+        annotation_id: annotation.id,
+        author_name: name,
+        author_email: email,
+        body,
+      });
+    }
+
+    const sidebarCallbacks = { loadReplies: loadRepliesForAnnotation, onReply: handleSidebarReply };
+
     // Load existing annotations for this page
     async function loadAnnotations() {
       const { data, error } = await supabase
@@ -246,7 +303,22 @@ import { subscribeToAnnotations } from "./realtime.js";
         pinContainer.removeChild(pinContainer.firstChild);
       }
 
-      (data || []).forEach((annotation, index) => {
+      // Fetch reply counts for all annotations
+      const annotations = data || [];
+      if (annotations.length > 0) {
+        const ids = annotations.map((a) => a.id);
+        const { data: replyCounts } = await supabase
+          .from("replies")
+          .select("annotation_id")
+          .in("annotation_id", ids);
+        const countMap = {};
+        (replyCounts || []).forEach((r) => {
+          countMap[r.annotation_id] = (countMap[r.annotation_id] || 0) + 1;
+        });
+        annotations.forEach((a) => { a._replyCount = countMap[a.id] || 0; });
+      }
+
+      annotations.forEach((annotation, index) => {
         addAnnotation(annotation);
 
         const { x, y } = restorePinPosition(
@@ -257,11 +329,13 @@ import { subscribeToAnnotations } from "./realtime.js";
 
         const pin = createPinMarker(index + 1, x, y, () =>
           showThread(annotation, pin),
+          annotation.author_name,
         );
         pinContainer.appendChild(pin);
       });
 
-      updateBadge(fab, data?.length || 0);
+      updateSidebarBadge(sidebar, annotations.length);
+      updateSidebarList(sidebar, annotations, sidebarCallbacks);
     }
 
     // Validate project exists and domain is allowed
@@ -310,9 +384,11 @@ import { subscribeToAnnotations } from "./realtime.js";
             x,
             y,
             () => showThread(ann, pin),
+            ann.author_name,
           );
           pinContainer.appendChild(pin);
-          updateBadge(fab, getAnnotations().filter((a) => a.status === "open").length);
+          updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status === "open").length);
+          updateSidebarList(sidebar, getAnnotations().filter((a) => a.status === "open"), sidebarCallbacks);
         },
         onUpdate: () => loadAnnotations(),
         onDelete: () => loadAnnotations(),

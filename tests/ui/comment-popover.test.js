@@ -29,14 +29,15 @@ describe("createCommentPopover", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("pre-fills name and email from localStorage", () => {
+  it("shows identity bar when localStorage has saved identity", () => {
     localStorage.setItem("markux-reviewer-name", "Alice");
     localStorage.setItem("markux-reviewer-email", "alice@test.com");
 
     const p = createCommentPopover({ x: 100, y: 200 }, onSubmit, onClose);
-    const nameInput = p.querySelector('input[name="name"]');
-    const emailInput = p.querySelector('input[name="email"]');
-    expect(nameInput.value).toBe("Alice");
-    expect(emailInput.value).toBe("alice@test.com");
+    const identityBar = p.querySelector(".markux-identity-bar");
+    expect(identityBar).toBeTruthy();
+    expect(identityBar.textContent).toContain("Alice");
+    // Name/email inputs should not be present
+    expect(p.querySelector('input[name="name"]')).toBeNull();
   });
 });
