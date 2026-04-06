@@ -63,8 +63,8 @@ ${_}`}var BA=class extends Error{constructor({message:A,code:t,cause:i,name:o}){
   /* Floating Button */
   .markux-fab {
     position: fixed;
-    bottom: 80px;
-    right: 24px;
+    bottom: 100px;
+    right: 34px;
     width: 48px;
     height: 48px;
     border-radius: 50%;
