@@ -88,15 +88,15 @@ export const STYLES = `
 
   .markux-mode-label {
     position: fixed;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: #dc2626;
     color: white;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 4px 16px;
-    border-radius: 9999px;
+    padding: 8px 0;
+    text-align: center;
     z-index: 2147483647;
     pointer-events: none;
     opacity: 0;
