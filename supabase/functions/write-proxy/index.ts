@@ -99,7 +99,7 @@ serve(async (req) => {
     // Validate origin against project's allowed_domains
     const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("allowed_domains")
+      .select("allowed_domains, name")
       .eq("id", project_id)
       .single();
 
@@ -153,10 +153,11 @@ serve(async (req) => {
       if (error) throw error;
       result = annotation;
 
+      const projectName = project.name || "MarkUX";
       const pageUrl = annotation.page_url || "unknown page";
       const author = annotation.author_name || "Someone";
       sendNotificationEmail(
-        `MarkUX -- New UX comment`,
+        `${projectName} -- New UX comment`,
         `<p><strong>${author}</strong> left a comment on <a href="${pageUrl}">${pageUrl}</a>:</p><blockquote>${annotation.comment}</blockquote>`,
         `${author} left a comment on ${pageUrl}: "${annotation.comment}"`,
       );
@@ -182,9 +183,10 @@ serve(async (req) => {
       if (error) throw error;
       result = reply;
 
+      const projectName = project.name || "MarkUX";
       const replyAuthor = reply.author_name || "Someone";
       sendNotificationEmail(
-        `MarkUX -- New UX comment`,
+        `${projectName} -- New UX comment`,
         `<p><strong>${replyAuthor}</strong> replied to an annotation:</p><blockquote>${reply.body}</blockquote>`,
         `${replyAuthor} replied to an annotation: "${reply.body}"`,
       );
