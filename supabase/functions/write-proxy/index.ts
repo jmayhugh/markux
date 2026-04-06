@@ -156,7 +156,7 @@ serve(async (req) => {
       const pageUrl = annotation.page_url || "unknown page";
       const author = annotation.author_name || "Someone";
       sendNotificationEmail(
-        `[MarkUX] New UX comment`,
+        `MarkUX -- New UX comment`,
         `<p><strong>${author}</strong> left a comment on <a href="${pageUrl}">${pageUrl}</a>:</p><blockquote>${annotation.comment}</blockquote>`,
         `${author} left a comment on ${pageUrl}: "${annotation.comment}"`,
       );
@@ -184,7 +184,7 @@ serve(async (req) => {
 
       const replyAuthor = reply.author_name || "Someone";
       sendNotificationEmail(
-        `[MarkUX] New UX comment`,
+        `MarkUX -- New UX comment`,
         `<p><strong>${replyAuthor}</strong> replied to an annotation:</p><blockquote>${reply.body}</blockquote>`,
         `${replyAuthor} replied to an annotation: "${reply.body}"`,
       );
