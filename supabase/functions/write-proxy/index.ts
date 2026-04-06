@@ -3,8 +3,31 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const agentmailApiKey = Deno.env.get("AGENTMAIL_API_KEY") ?? "";
 
 const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+const NOTIFY_EMAIL = "julia.mayhugh@ncwit.org";
+const AGENTMAIL_INBOX = "markux-notifications@agentmail.to";
+
+async function sendNotificationEmail(subject: string, html: string, text: string) {
+  if (!agentmailApiKey) return;
+  try {
+    await fetch(
+      `https://api.agentmail.to/v0/inboxes/${AGENTMAIL_INBOX}/messages/send`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${agentmailApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ to: NOTIFY_EMAIL, subject, html, text }),
+      },
+    );
+  } catch {
+    // Email failure should not block the annotation write
+  }
+}
 
 // In-memory rate limit store (resets on cold start — acceptable for v1)
 const rateLimits = new Map<string, { count: number; resetAt: number }>();
@@ -129,6 +152,14 @@ serve(async (req) => {
         .single();
       if (error) throw error;
       result = annotation;
+
+      const pageUrl = annotation.page_url || "unknown page";
+      const author = annotation.author_name || "Someone";
+      sendNotificationEmail(
+        `New comment on ${pageUrl}`,
+        `<p><strong>${author}</strong> left a comment on <a href="${pageUrl}">${pageUrl}</a>:</p><blockquote>${annotation.comment}</blockquote>`,
+        `${author} left a comment on ${pageUrl}: "${annotation.comment}"`,
+      );
     } else if (action === "create_reply") {
       // Validate that the annotation belongs to this project
       const { data: parentAnnotation, error: annError } = await supabase
@@ -150,6 +181,13 @@ serve(async (req) => {
         .single();
       if (error) throw error;
       result = reply;
+
+      const replyAuthor = reply.author_name || "Someone";
+      sendNotificationEmail(
+        `New reply on annotation`,
+        `<p><strong>${replyAuthor}</strong> replied to an annotation:</p><blockquote>${reply.body}</blockquote>`,
+        `${replyAuthor} replied to an annotation: "${reply.body}"`,
+      );
     } else if (action === "delete_annotation") {
       // Verify the annotation belongs to this project and matches the author email
       const { data: annotation, error: annError } = await supabase
