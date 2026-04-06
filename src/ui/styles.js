@@ -47,8 +47,7 @@ export const STYLES = `
   .markux-fab svg {
     width: 22px;
     height: 22px;
-    fill: none;
-    stroke: white;
+    fill: white;
   }
 
   .markux-fab .badge {

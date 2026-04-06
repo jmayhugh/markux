@@ -92,8 +92,7 @@ ${_}`}var BA=class extends Error{constructor({message:A,code:t,cause:i,name:o}){
   .markux-fab svg {
     width: 22px;
     height: 22px;
-    fill: none;
-    stroke: white;
+    fill: white;
   }
 
   .markux-fab .badge {
@@ -707,10 +706,8 @@ ${_}`}var BA=class extends Error{constructor({message:A,code:t,cause:i,name:o}){
   .markux-identity-fields {
     margin-bottom: 4px;
   }
-`;var Pc=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
-  <line x1="8" y1="9.5" x2="16" y2="9.5"/>
-  <line x1="8" y1="13.5" x2="13" y2="13.5"/>
+`;var Pc=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"/>
 </svg>`,iw=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
   <path d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"/>
 </svg>`;function Mc(e){let A=document.createElement("button");A.className="markux-fab",A.innerHTML=Pc,A.setAttribute("aria-label","Toggle MarkUX annotations");let t=!1;return A.addEventListener("click",()=>{t=!t,A.classList.toggle("active",t),A.innerHTML=t?iw:Pc,A._badgeCount>0&&aw(A,A._badgeCount),e(t)}),A._badgeCount=0,A}function aw(e,A){e._badgeCount=A;let t=e.querySelector(".badge");if(t&&t.remove(),A>0){let i=document.createElement("span");i.className="badge",i.textContent=A,e.appendChild(i)}}function Gc(e){let A=document.createElement("div");return A.className="markux-overlay",A.addEventListener("click",e),A}function Vc(){let e=document.createElement("div");return e.className="markux-highlight",e.style.display="none",e}function jc(e){e.classList.add("active")}function Jc(e){e.classList.remove("active")}function Wc(e,A,t){return()=>{}}function $c(e,A,t){e.style.pointerEvents="none";let i=document.elementFromPoint(A,t);return e.style.pointerEvents="auto",i}var ow=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
