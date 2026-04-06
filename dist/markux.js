@@ -138,15 +138,16 @@ ${_}`}var BA=class extends Error{constructor({message:A,code:t,cause:i,name:o}){
     right: 0;
     background: #dc2626;
     color: white;
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 600;
-    padding: 8px 0;
+    padding: 4px 0;
     text-align: center;
+    text-transform: uppercase;
     z-index: 2147483647;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s ease;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
   }
 
   .markux-mode-label.visible {
