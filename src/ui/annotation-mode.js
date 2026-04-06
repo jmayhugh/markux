@@ -27,6 +27,7 @@ export function activateAnnotationMode(overlay) {
 
 export function deactivateAnnotationMode(overlay) {
   overlay.classList.remove("active");
+  overlay.style.pointerEvents = "";
 }
 
 /**
