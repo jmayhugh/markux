@@ -10,8 +10,9 @@ const supabase = createClient(supabaseUrl, serviceRoleKey);
 const NOTIFY_EMAIL = "julia.mayhugh@ncwit.org";
 const AGENTMAIL_INBOX = "markux-notifications@agentmail.to";
 
-async function sendNotificationEmail(subject: string, html: string, text: string) {
+async function sendNotificationEmail(to: string, subject: string, html: string, text: string) {
   if (!agentmailApiKey) return;
+  if (!to) return;
   try {
     await fetch(
       `https://api.agentmail.to/v0/inboxes/${AGENTMAIL_INBOX}/messages/send`,
@@ -21,7 +22,7 @@ async function sendNotificationEmail(subject: string, html: string, text: string
           Authorization: `Bearer ${agentmailApiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ to: NOTIFY_EMAIL, subject, html, text }),
+        body: JSON.stringify({ to, subject, html, text }),
       },
     );
   } catch {
@@ -157,6 +158,7 @@ serve(async (req) => {
       const pageUrl = annotation.page_url || "unknown page";
       const author = annotation.author_name || "Someone";
       sendNotificationEmail(
+        NOTIFY_EMAIL,
         `${projectName} -- New UX comment`,
         `<p><strong>${author}</strong> left a comment on <a href="${pageUrl}">${pageUrl}</a>:</p><blockquote>${annotation.comment}</blockquote>`,
         `${author} left a comment on ${pageUrl}: "${annotation.comment}"`,
@@ -165,7 +167,7 @@ serve(async (req) => {
       // Validate that the annotation belongs to this project
       const { data: parentAnnotation, error: annError } = await supabase
         .from("annotations")
-        .select("id")
+        .select("id, author_email, author_name, page_url, comment")
         .eq("id", data.annotation_id)
         .eq("project_id", project_id)
         .single();
@@ -186,10 +188,33 @@ serve(async (req) => {
       const projectName = project.name || "MarkUX";
       const replyAuthor = reply.author_name || "Someone";
       sendNotificationEmail(
+        NOTIFY_EMAIL,
         `${projectName} -- New UX comment`,
         `<p><strong>${replyAuthor}</strong> replied to an annotation:</p><blockquote>${reply.body}</blockquote>`,
         `${replyAuthor} replied to an annotation: "${reply.body}"`,
       );
+
+      const authorEmail = parentAnnotation.author_email;
+      if (authorEmail) {
+        const originalAuthor = parentAnnotation.author_name || "the author";
+        const snippet =
+          (parentAnnotation.comment || "").length > 200
+            ? parentAnnotation.comment.slice(0, 200) + "…"
+            : parentAnnotation.comment || "";
+        const deepLink = `${parentAnnotation.page_url}#markux=${parentAnnotation.id}`;
+        sendNotificationEmail(
+          authorEmail,
+          `[${projectName}] New reply to your comment`,
+          `<p>Hi ${originalAuthor},</p>
+           <p><strong>${replyAuthor}</strong> replied to your comment on <a href="${parentAnnotation.page_url}">${parentAnnotation.page_url}</a>.</p>
+           <p><em>Your comment:</em></p>
+           <blockquote>${snippet}</blockquote>
+           <p><em>${replyAuthor}'s reply:</em></p>
+           <blockquote>${reply.body}</blockquote>
+           <p><a href="${deepLink}">View in context →</a></p>`,
+          `Hi ${originalAuthor},\n\n${replyAuthor} replied to your comment on ${parentAnnotation.page_url}.\n\nYour comment: "${snippet}"\n\n${replyAuthor}'s reply: "${reply.body}"\n\nView in context: ${deepLink}`,
+        );
+      }
     } else if (action === "delete_annotation") {
       // Verify the annotation belongs to this project and matches the author email
       const { data: annotation, error: annError } = await supabase
