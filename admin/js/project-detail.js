@@ -137,12 +137,24 @@ export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {
   });
   actionCell.appendChild(toggleBtn);
 
+  // View-in-context cell
+  const viewCell = document.createElement("td");
+  const viewLink = document.createElement("a");
+  viewLink.href = `${annotation.page_url}#markux=${annotation.id}`;
+  viewLink.target = "_blank";
+  viewLink.rel = "noopener noreferrer";
+  viewLink.textContent = "View";
+  viewLink.className = "btn btn-sm btn-link";
+  viewLink.addEventListener("click", (e) => e.stopPropagation());
+  viewCell.appendChild(viewLink);
+
   tr.appendChild(pageCell);
   tr.appendChild(authorCell);
   tr.appendChild(commentCell);
   tr.appendChild(statusCell);
   tr.appendChild(dateCell);
   tr.appendChild(actionCell);
+  tr.appendChild(viewCell);
 
   tr.addEventListener("click", (e) => {
     if (e.target.closest(".toggle-status")) return;
