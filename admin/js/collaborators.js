@@ -60,3 +60,34 @@ export async function loadCollaborators(projectId) {
 
   return [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+export async function updateCollaborator({ projectId, oldEmail, newName, newEmail }) {
+  const supabase = getSupabase();
+  const oldEmailLower = (oldEmail || "").toLowerCase();
+  const newEmailLower = (newEmail || "").toLowerCase();
+
+  // 1. Update annotations in this project
+  const { error: annErr } = await supabase
+    .from("annotations")
+    .update({ author_name: newName, author_email: newEmailLower })
+    .eq("project_id", projectId)
+    .ilike("author_email", oldEmailLower);
+  if (annErr) throw annErr;
+
+  // 2. Get all annotation ids in this project, then update matching replies
+  const { data: annotations, error: listErr } = await supabase
+    .from("annotations")
+    .select("id")
+    .eq("project_id", projectId);
+  if (listErr) throw listErr;
+
+  const ids = (annotations || []).map((a) => a.id);
+  if (ids.length > 0) {
+    const { error: repErr } = await supabase
+      .from("replies")
+      .update({ author_name: newName, author_email: newEmailLower })
+      .in("annotation_id", ids)
+      .ilike("author_email", oldEmailLower);
+    if (repErr) throw repErr;
+  }
+}
