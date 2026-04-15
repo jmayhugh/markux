@@ -662,4 +662,21 @@ export const STYLES = `
   .markux-identity-fields {
     margin-bottom: 4px;
   }
+
+@keyframes markux-pin-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+  50%  { transform: scale(1.35); box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.markux-pin.markux-pin--pulse {
+  animation: markux-pin-pulse 2s ease-out 2;
+}
+
+@keyframes markux-sidebar-item-highlight {
+  0%   { background-color: rgba(220, 38, 38, 0.18); }
+  100% { background-color: transparent; }
+}
+.markux-sidebar-item.markux-sidebar-item--highlight {
+  animation: markux-sidebar-item-highlight 2s ease-out 1;
+}
 `;
