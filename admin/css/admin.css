@@ -112,3 +112,23 @@ body {
 .gap-4 { gap: 16px; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+
+/* Collaborators section */
+.collaborators .collaborator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+.collaborators .collaborator-row:last-child { border-bottom: none; }
+.collaborators .collaborator-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.collaborators .collaborator-name { font-weight: 600; }
+.collaborators .collaborator-email { color: #6b7280; font-size: 13px; }
+.collaborators .collaborator-counts { color: #6b7280; font-size: 13px; }
+.collaborators.collapsed #collaborators-list,
+.collaborators.collapsed #collaborators-empty { display: none; }
