@@ -135,6 +135,7 @@
     import { renderVisualReplay } from './js/visual-replay.js';
     import { exportCsv } from './js/csv-export.js';
     import { renderSnippet } from './js/embed-snippet.js';
+    import { renderCollaboratorsSection } from './js/collaborators.js';
 
     const session = await requireAuth();
     if (!session) throw new Error('Not authenticated');
@@ -322,6 +323,9 @@
         alert('Failed to delete: ' + err.message);
       }
     });
+
+    // Render Collaborators section (refreshes annotations when a collaborator edit happens)
+    await renderCollaboratorsSection(projectId, { onChange: () => render() });
 
     await render();
   </script>

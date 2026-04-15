@@ -91,3 +91,136 @@ export async function updateCollaborator({ projectId, oldEmail, newName, newEmai
     if (repErr) throw repErr;
   }
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function renderCollaboratorsSection(projectId, { onChange } = {}) {
+  const section = document.getElementById("collaborators-section");
+  const list = document.getElementById("collaborators-list");
+  const empty = document.getElementById("collaborators-empty");
+  const title = document.getElementById("collaborators-title");
+  const toggle = document.getElementById("collaborators-toggle");
+
+  const collaborators = await loadCollaborators(projectId);
+
+  list.replaceChildren();
+  title.textContent = `Collaborators (${collaborators.length})`;
+
+  if (collaborators.length === 0) {
+    empty.style.display = "block";
+  } else {
+    empty.style.display = "none";
+    collaborators.forEach((c) => list.appendChild(renderRow(c)));
+  }
+
+  // Initial collapse state: collapsed if > 10
+  if (collaborators.length > 10) {
+    section.classList.add("collapsed");
+    toggle.textContent = "Expand";
+  } else {
+    section.classList.remove("collapsed");
+    toggle.textContent = "Collapse";
+  }
+
+  toggle.onclick = () => {
+    const isCollapsed = section.classList.toggle("collapsed");
+    toggle.textContent = isCollapsed ? "Expand" : "Collapse";
+  };
+
+  function renderRow(c) {
+    const row = document.createElement("div");
+    row.className = "collaborator-row";
+
+    const info = document.createElement("div");
+    info.className = "collaborator-info";
+    const nameEl = document.createElement("span");
+    nameEl.className = "collaborator-name";
+    nameEl.textContent = c.name || "(no name)";
+    const emailEl = document.createElement("span");
+    emailEl.className = "collaborator-email";
+    emailEl.textContent = c.displayEmail;
+    info.appendChild(nameEl);
+    info.appendChild(emailEl);
+
+    const counts = document.createElement("span");
+    counts.className = "collaborator-counts";
+    counts.textContent = `${c.annotationCount} comment${c.annotationCount === 1 ? "" : "s"} · ${c.replyCount} repl${c.replyCount === 1 ? "y" : "ies"}`;
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "btn btn-sm btn-secondary";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => openEditModal(c));
+
+    const right = document.createElement("div");
+    right.style.display = "flex";
+    right.style.gap = "12px";
+    right.style.alignItems = "center";
+    right.appendChild(counts);
+    right.appendChild(editBtn);
+
+    row.appendChild(info);
+    row.appendChild(right);
+    return row;
+  }
+
+  function openEditModal(c) {
+    const modal = document.getElementById("collaborator-modal");
+    const nameInput = document.getElementById("collab-name");
+    const emailInput = document.getElementById("collab-email");
+    const saveBtn = document.getElementById("collab-save");
+    const cancelBtn = document.getElementById("collab-cancel");
+    const errorEl = document.getElementById("collab-error");
+    const form = document.getElementById("collaborator-form");
+
+    nameInput.value = c.name || "";
+    emailInput.value = c.displayEmail;
+    errorEl.style.display = "none";
+    errorEl.textContent = "";
+    saveBtn.disabled = true;
+
+    function validate() {
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const valid =
+        name.length > 0 &&
+        EMAIL_RE.test(email) &&
+        (name !== (c.name || "") || email.toLowerCase() !== c.email);
+      saveBtn.disabled = !valid;
+    }
+
+    nameInput.oninput = validate;
+    emailInput.oninput = validate;
+
+    function close() {
+      modal.style.display = "none";
+      form.onsubmit = null;
+      cancelBtn.onclick = null;
+    }
+
+    cancelBtn.onclick = close;
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      saveBtn.disabled = true;
+      errorEl.style.display = "none";
+      try {
+        await updateCollaborator({
+          projectId,
+          oldEmail: c.email,
+          newName: nameInput.value.trim(),
+          newEmail: emailInput.value.trim(),
+        });
+        close();
+        await renderCollaboratorsSection(projectId, { onChange });
+        if (onChange) await onChange();
+      } catch (err) {
+        errorEl.textContent = err.message || "Failed to save.";
+        errorEl.style.display = "block";
+        saveBtn.disabled = false;
+      }
+    };
+
+    modal.style.display = "flex";
+  }
+}
