@@ -26,6 +26,7 @@ import { createCommentPopover } from "./ui/comment-popover.js";
 import { createThreadPopover } from "./ui/thread-popover.js";
 import { createSidebar, updateSidebarList, updateSidebarBadge, openSidebar, closeSidebar } from "./ui/sidebar.js";
 import { subscribeToAnnotations } from "./realtime.js";
+import { handleDeepLink } from "./deep-link.js";
 
 (function () {
   // Find our script tag — cannot use document.currentScript inside esbuild IIFE
@@ -300,6 +301,8 @@ import { subscribeToAnnotations } from "./realtime.js";
 
     const sidebarCallbacks = { loadReplies: loadRepliesForAnnotation, onReply: handleSidebarReply, onDelete: handleSidebarDelete, onStatusChange: handleSidebarStatusChange };
 
+    let deepLinkHandled = false;
+
     // Load existing annotations for this page
     async function loadAnnotations() {
       const { data, error } = await supabase
@@ -361,6 +364,18 @@ import { subscribeToAnnotations } from "./realtime.js";
 
       updateSidebarBadge(sidebar, annotations.filter((a) => a.status === "open").length);
       updateSidebarList(sidebar, annotations, sidebarCallbacks);
+
+      if (!deepLinkHandled) {
+        deepLinkHandled = true;
+        handleDeepLink({
+          hash: window.location.hash,
+          sidebar,
+          pinContainer,
+          annotations,
+          openSidebar,
+          onSelect: handleSidebarSelect,
+        });
+      }
     }
 
     // Validate project exists and domain is allowed
