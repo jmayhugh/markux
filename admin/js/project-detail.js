@@ -33,13 +33,14 @@ export async function deleteProject(projectId) {
   if (error) throw error;
 }
 
-export async function loadAnnotations(projectId, filters = {}) {
+export async function loadAnnotations(projectId, filters = {}, sort = { column: "created_at", direction: "desc" }) {
   const supabase = getSupabase();
+  const ascending = sort.direction === "asc";
   let query = supabase
     .from("annotations")
     .select("*")
     .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
+    .order(sort.column, { ascending });
 
   if (filters.status) {
     query = query.eq("status", filters.status);
