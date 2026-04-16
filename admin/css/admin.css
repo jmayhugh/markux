@@ -93,7 +93,8 @@ body {
 .project-card .counts { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; }
 
 .filter-row td.filter-cell { background: #f9fafb; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
-.filter-cell select, .filter-cell input { width: 100%; padding: 10px 16px; font-size: 14px; box-sizing: border-box; }
+.filter-cell select, .filter-cell input { width: 100%; padding: 10px 16px; font-size: 14px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 6px; background-color: white; }
+.filter-cell select { appearance: none; -webkit-appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
 
 .replay-container { position: relative; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
 .replay-container img { width: 100%; display: block; }

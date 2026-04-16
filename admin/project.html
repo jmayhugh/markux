@@ -33,9 +33,9 @@
         <thead>
           <tr>
             <th class="sortable" data-sort="page_url"><span class="sort-label">Page</span><span class="sort-indicator"></span></th>
-            <th class="sortable" data-sort="author_name"><span class="sort-label">Author</span><span class="sort-indicator"></span></th>
             <th>Comment</th>
             <th class="sortable" data-sort="status"><span class="sort-label">Status</span><span class="sort-indicator"></span></th>
+            <th class="sortable" data-sort="author_name"><span class="sort-label">Author</span><span class="sort-indicator"></span></th>
             <th class="sortable" data-sort="created_at"><span class="sort-label">Date</span><span class="sort-indicator"></span></th>
             <th></th>
             <th></th>
@@ -44,9 +44,6 @@
             <td class="filter-cell">
               <select id="filter-page"><option value="">All pages</option></select>
             </td>
-            <td class="filter-cell">
-              <select id="filter-author"><option value="">All authors</option></select>
-            </td>
             <td class="filter-cell"></td>
             <td class="filter-cell">
               <select id="filter-status">
@@ -54,6 +51,9 @@
                 <option value="open">Open</option>
                 <option value="resolved">Resolved</option>
               </select>
+            </td>
+            <td class="filter-cell">
+              <select id="filter-author"><option value="">All authors</option></select>
             </td>
             <td class="filter-cell"></td>
             <td class="filter-cell"></td>

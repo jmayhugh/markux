@@ -168,9 +168,9 @@ export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {
   viewCell.appendChild(viewLink);
 
   tr.appendChild(pageCell);
-  tr.appendChild(authorCell);
   tr.appendChild(commentCell);
   tr.appendChild(statusCell);
+  tr.appendChild(authorCell);
   tr.appendChild(dateCell);
   tr.appendChild(actionCell);
   tr.appendChild(viewCell);
