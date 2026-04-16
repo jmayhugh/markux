@@ -3,9 +3,6 @@ import { getSupabase } from "./supabase-client.js";
 
 export async function loadProjects() {
   const supabase = getSupabase();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const { data: projects, error } = await supabase
     .from("projects")
