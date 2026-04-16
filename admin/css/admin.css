@@ -87,8 +87,8 @@ body {
 .project-card .meta { font-size: 13px; color: #6b7280; }
 .project-card .counts { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; }
 
-.filters { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-.filters select, .filters input { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+.filter-row td.filter-cell { background: #f9fafb; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+.filter-cell select, .filter-cell input { width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
 
 .replay-container { position: relative; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
 .replay-container img { width: 100%; display: block; }

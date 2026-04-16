@@ -28,20 +28,29 @@
       </div>
     </div>
 
-    <div class="filters" id="filters">
-      <select id="filter-status">
-        <option value="">All statuses</option>
-        <option value="open">Open</option>
-        <option value="resolved">Resolved</option>
-      </select>
-      <select id="filter-page"><option value="">All pages</option></select>
-      <input id="filter-author" type="text" placeholder="Filter by author...">
-    </div>
-
     <div id="list-view" class="card">
       <table class="table">
         <thead>
           <tr><th>Page</th><th>Author</th><th>Comment</th><th>Status</th><th>Date</th><th></th><th></th></tr>
+          <tr class="filter-row">
+            <td class="filter-cell">
+              <select id="filter-page"><option value="">All pages</option></select>
+            </td>
+            <td class="filter-cell">
+              <input id="filter-author" type="text" placeholder="Filter by author...">
+            </td>
+            <td class="filter-cell"></td>
+            <td class="filter-cell">
+              <select id="filter-status">
+                <option value="">All statuses</option>
+                <option value="open">Open</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </td>
+            <td class="filter-cell"></td>
+            <td class="filter-cell"></td>
+            <td class="filter-cell"></td>
+          </tr>
         </thead>
         <tbody id="annotations-body"></tbody>
       </table>
