@@ -10,7 +10,6 @@ export async function loadProjects() {
   const { data: projects, error } = await supabase
     .from("projects")
     .select("*")
-    .eq("owner_email", user.email)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
