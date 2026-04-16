@@ -74,6 +74,10 @@ body {
 .table { width: 100%; border-collapse: collapse; }
 .table th, .table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
 .table th { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; }
+.table th.sortable { cursor: pointer; user-select: none; }
+.table th.sortable:hover { color: #374151; }
+.table th .sort-indicator { display: inline-block; margin-left: 6px; font-size: 10px; color: #9ca3af; min-width: 8px; }
+.table th.sortable.active .sort-indicator { color: #6366f1; }
 .table tbody tr:hover td { background: #f9fafb; }
 .table tbody tr { cursor: pointer; }
 

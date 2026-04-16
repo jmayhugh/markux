@@ -31,7 +31,15 @@
     <div id="list-view" class="card">
       <table class="table">
         <thead>
-          <tr><th>Page</th><th>Author</th><th>Comment</th><th>Status</th><th>Date</th><th></th><th></th></tr>
+          <tr>
+            <th class="sortable" data-sort="page_url"><span class="sort-label">Page</span><span class="sort-indicator"></span></th>
+            <th class="sortable" data-sort="author_name"><span class="sort-label">Author</span><span class="sort-indicator"></span></th>
+            <th class="sortable" data-sort="comment"><span class="sort-label">Comment</span><span class="sort-indicator"></span></th>
+            <th class="sortable" data-sort="status"><span class="sort-label">Status</span><span class="sort-indicator"></span></th>
+            <th class="sortable" data-sort="created_at"><span class="sort-label">Date</span><span class="sort-indicator"></span></th>
+            <th></th>
+            <th></th>
+          </tr>
           <tr class="filter-row">
             <td class="filter-cell">
               <select id="filter-page"><option value="">All pages</option></select>
@@ -137,13 +145,15 @@
     const threadPanel = document.getElementById('thread-panel');
     const threadContent = document.getElementById('thread-content');
 
+    let sortState = { column: 'created_at', direction: 'desc' };
+
     async function render() {
       const filters = {
         status: document.getElementById('filter-status').value,
         pageUrl: document.getElementById('filter-page').value,
         author: document.getElementById('filter-author').value,
       };
-      const annotations = await loadAnnotations(projectId, filters);
+      const annotations = await loadAnnotations(projectId, filters, sortState);
       tbody.replaceChildren();
       if (annotations.length === 0) {
         listEmpty.style.display = 'block';
@@ -156,7 +166,34 @@
           }));
         });
       }
+      updateSortIndicators();
     }
+
+    function updateSortIndicators() {
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const col = th.getAttribute('data-sort');
+        const indicator = th.querySelector('.sort-indicator');
+        if (col === sortState.column) {
+          th.classList.add('active');
+          indicator.textContent = sortState.direction === 'asc' ? '▲' : '▼';
+        } else {
+          th.classList.remove('active');
+          indicator.textContent = '';
+        }
+      });
+    }
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const col = th.getAttribute('data-sort');
+        if (sortState.column === col) {
+          sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortState = { column: col, direction: 'asc' };
+        }
+        render();
+      });
+    });
 
     async function expandThread(annotation) {
       threadPanel.style.display = 'block';
