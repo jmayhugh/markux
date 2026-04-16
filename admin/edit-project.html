@@ -1,0 +1,129 @@
+<!-- admin/edit-project.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Project — MarkUX Admin</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="header">
+    <h1><a href="projects.html" style="color:inherit;text-decoration:none">MarkUX</a></h1>
+    <div class="header-actions">
+      <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="flex justify-between items-center mb-4 mt-4">
+      <h2 id="edit-heading">Editing</h2>
+      <a id="back-link" class="btn btn-sm btn-secondary" href="#">Back to project</a>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:12px">Project details</h3>
+      <form id="edit-form">
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input class="form-input" type="text" id="edit-name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Allowed Domains (comma-separated)</label>
+          <input class="form-input" type="text" id="edit-domains" placeholder="localhost, example.com">
+        </div>
+        <div id="edit-error" class="error-msg" style="display:none"></div>
+        <div id="edit-saved" class="text-muted" style="display:none;margin-top:8px">Saved.</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card collaborators" id="collaborators-section" style="margin-bottom:16px">
+      <div class="flex justify-between items-center" style="margin-bottom:8px">
+        <h3 id="collaborators-title">Collaborators</h3>
+        <button type="button" id="collaborators-toggle" class="btn btn-sm btn-secondary">Collapse</button>
+      </div>
+      <div id="collaborators-list"></div>
+      <div id="collaborators-empty" class="empty-state" style="display:none">No collaborators yet.</div>
+    </div>
+  </div>
+
+  <!-- Edit Collaborator Modal -->
+  <div id="collaborator-modal" class="modal-backdrop" style="display:none">
+    <div class="modal">
+      <h3>Edit Collaborator</h3>
+      <form id="collaborator-form">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" type="text" id="collab-name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="collab-email" required>
+        </div>
+        <div id="collab-error" class="error-msg" style="display:none"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button type="submit" class="btn btn-primary" id="collab-save" disabled>Save</button>
+          <button type="button" id="collab-cancel" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { requireAuth, signOut } from './js/auth.js';
+    import { loadProject, updateProject } from './js/project-detail.js';
+    import { renderCollaboratorsSection } from './js/collaborators.js';
+
+    const session = await requireAuth();
+    if (!session) throw new Error('Not authenticated');
+
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get('id');
+    if (!projectId) { window.location.href = 'projects.html'; throw new Error('No project ID'); }
+
+    const project = await loadProject(projectId);
+    document.getElementById('edit-heading').textContent = `Editing: ${project.name}`;
+    document.title = `Edit ${project.name} — MarkUX Admin`;
+    document.getElementById('back-link').href = `project.html?id=${projectId}`;
+    document.getElementById('logout-btn').addEventListener('click', signOut);
+
+    // Prefill form
+    document.getElementById('edit-name').value = project.name;
+    document.getElementById('edit-domains').value = project.allowed_domains.join(', ');
+
+    // Save project fields (stay on page so collaborator edits can follow)
+    document.getElementById('edit-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('edit-name').value.trim();
+      const domainsStr = document.getElementById('edit-domains').value.trim();
+      const domains = domainsStr.split(',').map(d => d.trim()).filter(Boolean);
+      const errEl = document.getElementById('edit-error');
+      const savedEl = document.getElementById('edit-saved');
+      errEl.style.display = 'none';
+      savedEl.style.display = 'none';
+
+      if (!name) return;
+
+      try {
+        const updated = await updateProject(projectId, { name, allowed_domains: domains });
+        project.name = updated.name;
+        project.allowed_domains = updated.allowed_domains;
+        document.getElementById('edit-heading').textContent = `Editing: ${updated.name}`;
+        document.title = `Edit ${updated.name} — MarkUX Admin`;
+        savedEl.style.display = 'block';
+        setTimeout(() => { savedEl.style.display = 'none'; }, 2000);
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    });
+
+    // Collaborators section
+    await renderCollaboratorsSection(projectId);
+  </script>
+</body>
+</html>
