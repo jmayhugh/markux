@@ -163,7 +163,7 @@ export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {
   viewLink.target = "_blank";
   viewLink.rel = "noopener noreferrer";
   viewLink.textContent = "View";
-  viewLink.className = "btn btn-sm btn-link";
+  viewLink.className = "btn btn-sm btn-secondary";
   viewLink.addEventListener("click", (e) => e.stopPropagation());
   viewCell.appendChild(viewLink);
 
