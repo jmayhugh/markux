@@ -28,15 +28,6 @@
       </div>
     </div>
 
-    <div class="card collaborators" id="collaborators-section" style="margin-bottom:16px">
-      <div class="flex justify-between items-center" style="margin-bottom:8px">
-        <h3 id="collaborators-title">Collaborators</h3>
-        <button type="button" id="collaborators-toggle" class="btn btn-sm btn-secondary">Collapse</button>
-      </div>
-      <div id="collaborators-list"></div>
-      <div id="collaborators-empty" class="empty-state" style="display:none">No collaborators yet.</div>
-    </div>
-
     <div class="filters" id="filters">
       <select id="filter-status">
         <option value="">All statuses</option>
@@ -79,50 +70,6 @@
     </div>
   </div>
 
-  <!-- Edit Modal -->
-  <div id="edit-modal" class="modal-backdrop" style="display:none">
-    <div class="modal">
-      <h3>Edit Project</h3>
-      <form id="edit-form">
-        <div class="form-group">
-          <label class="form-label">Project Name</label>
-          <input class="form-input" type="text" id="edit-name" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Allowed Domains (comma-separated)</label>
-          <input class="form-input" type="text" id="edit-domains" placeholder="localhost, example.com">
-        </div>
-        <div id="edit-error" class="error-msg" style="display:none"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button type="submit" class="btn btn-primary">Save</button>
-          <button type="button" id="close-edit" class="btn btn-secondary">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Edit Collaborator Modal -->
-  <div id="collaborator-modal" class="modal-backdrop" style="display:none">
-    <div class="modal">
-      <h3>Edit Collaborator</h3>
-      <form id="collaborator-form">
-        <div class="form-group">
-          <label class="form-label">Name</label>
-          <input class="form-input" type="text" id="collab-name" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input class="form-input" type="email" id="collab-email" required>
-        </div>
-        <div id="collab-error" class="error-msg" style="display:none"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button type="submit" class="btn btn-primary" id="collab-save" disabled>Save</button>
-          <button type="button" id="collab-cancel" class="btn btn-secondary">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script type="module">
     import { requireAuth, signOut } from './js/auth.js';
@@ -130,12 +77,11 @@
     import {
       loadProject, loadAnnotations, loadReplies,
       updateAnnotationStatus, getPageUrls, renderAnnotationRow,
-      updateProject, deleteProject
+      deleteProject
     } from './js/project-detail.js';
     import { renderVisualReplay } from './js/visual-replay.js';
     import { exportCsv } from './js/csv-export.js';
     import { renderSnippet } from './js/embed-snippet.js';
-    import { renderCollaboratorsSection } from './js/collaborators.js';
 
     const session = await requireAuth();
     if (!session) throw new Error('Not authenticated');
@@ -280,37 +226,9 @@
       document.getElementById('snippet-modal').style.display = 'none';
     });
 
-    // Edit project
+    // Edit project → navigate to full-page editor
     document.getElementById('edit-btn').addEventListener('click', () => {
-      document.getElementById('edit-name').value = project.name;
-      document.getElementById('edit-domains').value = project.allowed_domains.join(', ');
-      document.getElementById('edit-error').style.display = 'none';
-      document.getElementById('edit-modal').style.display = 'flex';
-    });
-
-    document.getElementById('close-edit').addEventListener('click', () => {
-      document.getElementById('edit-modal').style.display = 'none';
-    });
-
-    document.getElementById('edit-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('edit-name').value.trim();
-      const domainsStr = document.getElementById('edit-domains').value.trim();
-      const domains = domainsStr.split(',').map(d => d.trim()).filter(Boolean);
-
-      if (!name) return;
-
-      try {
-        const updated = await updateProject(projectId, { name, allowed_domains: domains });
-        project.name = updated.name;
-        project.allowed_domains = updated.allowed_domains;
-        document.getElementById('project-name').textContent = updated.name;
-        document.getElementById('edit-modal').style.display = 'none';
-      } catch (err) {
-        const errEl = document.getElementById('edit-error');
-        errEl.textContent = err.message;
-        errEl.style.display = 'block';
-      }
+      window.location.href = `edit-project.html?id=${projectId}`;
     });
 
     // Delete project
@@ -323,9 +241,6 @@
         alert('Failed to delete: ' + err.message);
       }
     });
-
-    // Render Collaborators section (refreshes annotations when a collaborator edit happens)
-    await renderCollaboratorsSection(projectId, { onChange: () => render() });
 
     await render();
   </script>
