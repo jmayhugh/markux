@@ -48,8 +48,8 @@ export async function loadAnnotations(projectId, filters = {}, sort = { column: 
   if (filters.pageUrl) {
     query = query.eq("page_url", filters.pageUrl);
   }
-  if (filters.author) {
-    query = query.ilike("author_name", `%${filters.author}%`);
+  if (filters.authorEmail) {
+    query = query.eq("author_email", filters.authorEmail);
   }
 
   const { data, error } = await query;
@@ -85,6 +85,24 @@ export async function getPageUrls(projectId) {
     .eq("project_id", projectId);
   if (error) throw error;
   return [...new Set((data || []).map((a) => a.page_url))];
+}
+
+export async function getAuthors(projectId) {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("annotations")
+    .select("author_name, author_email")
+    .eq("project_id", projectId);
+  if (error) throw error;
+  const map = new Map();
+  for (const row of data || []) {
+    const email = (row.author_email || "").toLowerCase();
+    if (!email) continue;
+    if (!map.has(email)) {
+      map.set(email, { email: row.author_email, name: row.author_name || row.author_email });
+    }
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {

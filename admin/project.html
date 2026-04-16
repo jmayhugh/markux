@@ -45,7 +45,7 @@
               <select id="filter-page"><option value="">All pages</option></select>
             </td>
             <td class="filter-cell">
-              <input id="filter-author" type="text" placeholder="Filter by author...">
+              <select id="filter-author"><option value="">All authors</option></select>
             </td>
             <td class="filter-cell"></td>
             <td class="filter-cell">
@@ -93,7 +93,7 @@
     import { getSupabaseUrl } from './js/supabase-client.js';
     import {
       loadProject, loadAnnotations, loadReplies,
-      updateAnnotationStatus, getPageUrls, renderAnnotationRow,
+      updateAnnotationStatus, getPageUrls, getAuthors, renderAnnotationRow,
       deleteProject
     } from './js/project-detail.js';
     import { renderVisualReplay } from './js/visual-replay.js';
@@ -139,6 +139,16 @@
       pageSelect.appendChild(opt);
     });
 
+    // Populate author filter
+    const authors = await getAuthors(projectId);
+    const authorSelect = document.getElementById('filter-author');
+    authors.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.email;
+      opt.textContent = a.name;
+      authorSelect.appendChild(opt);
+    });
+
     // Render annotations
     const tbody = document.getElementById('annotations-body');
     const listEmpty = document.getElementById('list-empty');
@@ -151,7 +161,7 @@
       const filters = {
         status: document.getElementById('filter-status').value,
         pageUrl: document.getElementById('filter-page').value,
-        author: document.getElementById('filter-author').value,
+        authorEmail: document.getElementById('filter-author').value,
       };
       const annotations = await loadAnnotations(projectId, filters, sortState);
       tbody.replaceChildren();
