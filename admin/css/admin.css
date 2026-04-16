@@ -76,7 +76,7 @@ body {
 .table th { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; background: #f9fafb; }
 .table th.sortable { cursor: pointer; user-select: none; }
 .table th.sortable:hover { color: #374151; }
-.table th .sort-indicator { display: inline-block; margin-left: 6px; font-size: 10px; color: #9ca3af; min-width: 8px; }
+.table th .sort-indicator { display: inline-block; margin-left: 18px; font-size: 10px; color: #9ca3af; min-width: 8px; }
 .table th.sortable.active .sort-indicator { color: #6366f1; }
 .table tbody tr:hover td { background: #f9fafb; }
 .table tbody tr { cursor: pointer; }
@@ -92,7 +92,7 @@ body {
 .project-card .counts { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; }
 
 .filter-row td.filter-cell { background: #f9fafb; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
-.filter-cell select, .filter-cell input { width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
+.filter-cell select, .filter-cell input { width: 100%; padding: 8px 10px; font-size: 14px; box-sizing: border-box; }
 
 .replay-container { position: relative; background: #1a1a1a; border-radius: 8px; overflow: hidden; }
 .replay-container img { width: 100%; display: block; }

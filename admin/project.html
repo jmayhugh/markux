@@ -34,7 +34,7 @@
           <tr>
             <th class="sortable" data-sort="page_url"><span class="sort-label">Page</span><span class="sort-indicator"></span></th>
             <th class="sortable" data-sort="author_name"><span class="sort-label">Author</span><span class="sort-indicator"></span></th>
-            <th class="sortable" data-sort="comment"><span class="sort-label">Comment</span><span class="sort-indicator"></span></th>
+            <th>Comment</th>
             <th class="sortable" data-sort="status"><span class="sort-label">Status</span><span class="sort-indicator"></span></th>
             <th class="sortable" data-sort="created_at"><span class="sort-label">Date</span><span class="sort-indicator"></span></th>
             <th></th>
@@ -175,7 +175,7 @@
         const indicator = th.querySelector('.sort-indicator');
         if (col === sortState.column) {
           th.classList.add('active');
-          indicator.textContent = sortState.direction === 'asc' ? '▲' : '▼';
+          indicator.textContent = sortState.direction === 'asc' ? '⌃' : '⌄';
         } else {
           th.classList.remove('active');
           indicator.textContent = '';
