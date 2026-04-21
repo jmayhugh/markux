@@ -20,13 +20,24 @@ export async function loadProjects() {
         .eq("project_id", project.id)
         .eq("status", "open");
 
+      const { count: feedbackCount } = await supabase
+        .from("annotations")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", project.id)
+        .eq("status", "feedback");
+
       const { count: resolvedCount } = await supabase
         .from("annotations")
         .select("*", { count: "exact", head: true })
         .eq("project_id", project.id)
         .eq("status", "resolved");
 
-      return { ...project, openCount: openCount || 0, resolvedCount: resolvedCount || 0 };
+      return {
+        ...project,
+        openCount: openCount || 0,
+        feedbackCount: feedbackCount || 0,
+        resolvedCount: resolvedCount || 0,
+      };
     }),
   );
 
@@ -73,6 +84,12 @@ export function renderProjectCard(project) {
   openStatus.textContent = `${project.openCount} open`;
   openSpan.appendChild(openStatus);
 
+  const feedbackSpan = document.createElement("span");
+  const feedbackStatus = document.createElement("span");
+  feedbackStatus.className = "status status-feedback";
+  feedbackStatus.textContent = `${project.feedbackCount} feedback`;
+  feedbackSpan.appendChild(feedbackStatus);
+
   const resolvedSpan = document.createElement("span");
   const resolvedStatus = document.createElement("span");
   resolvedStatus.className = "status status-resolved";
@@ -80,6 +97,7 @@ export function renderProjectCard(project) {
   resolvedSpan.appendChild(resolvedStatus);
 
   counts.appendChild(openSpan);
+  counts.appendChild(feedbackSpan);
   counts.appendChild(resolvedSpan);
 
   const dateMeta = document.createElement("div");
