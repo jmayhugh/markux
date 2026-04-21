@@ -139,3 +139,9 @@ body {
 .collaborators .collaborator-counts { color: #6b7280; font-size: 13px; }
 .collaborators.collapsed #collaborators-list,
 .collaborators.collapsed #collaborators-empty { display: none; }
+
+.status-select { border: none; cursor: pointer; font: inherit; display: inline-flex; align-items: center; gap: 4px; }
+.status-select-chevron { font-size: 10px; opacity: 0.7; }
+.status-select-popup { background: white; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); padding: 4px; display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+.status-select-option { border: none; cursor: pointer; font: inherit; text-align: left; }
+.status-select-option-current { outline: 2px solid #111827; outline-offset: -2px; }
