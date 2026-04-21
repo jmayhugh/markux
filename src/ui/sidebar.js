@@ -1,6 +1,7 @@
 // src/ui/sidebar.js
 
 import { getSavedIdentity, saveIdentity, createIdentityBar, createIdentityFields } from "./identity.js";
+import { createStatusSelect } from "./status-select.js";
 
 function formatTime(dateStr) {
   const d = new Date(dateStr);
@@ -104,9 +105,11 @@ export function updateSidebarList(sidebar, annotations, { loadReplies, onReply, 
     author.className = "markux-sidebar-item-author";
     author.textContent = annotation.author_name;
 
-    const status = document.createElement("span");
-    status.className = `markux-status ${annotation.status === "open" ? "markux-status-open" : "markux-status-resolved"}`;
-    status.textContent = annotation.status;
+    const status = createStatusSelect({
+      value: annotation.status,
+      onChange: (newStatus) => onStatusChange(annotation, newStatus),
+      root: sidebar,
+    });
 
     const time = document.createElement("span");
     time.className = "markux-sidebar-item-time";
@@ -135,18 +138,6 @@ export function updateSidebarList(sidebar, annotations, { loadReplies, onReply, 
     // Action buttons row
     const actions = document.createElement("div");
     actions.className = "markux-sidebar-item-actions";
-
-    // Status toggle
-    const statusBtn = document.createElement("button");
-    statusBtn.className = "markux-sidebar-item-status-btn";
-    statusBtn.textContent = annotation.status === "open" ? "Resolve" : "Reopen";
-    statusBtn.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      statusBtn.disabled = true;
-      const newStatus = annotation.status === "open" ? "resolved" : "open";
-      await onStatusChange(annotation, newStatus);
-    });
-    actions.appendChild(statusBtn);
 
     // Delete button — only if current user is the author
     const identity = getSavedIdentity();
