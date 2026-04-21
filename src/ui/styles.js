@@ -684,4 +684,38 @@ export const STYLES = `
 .markux-sidebar-item.markux-sidebar-item--highlight {
   animation: markux-sidebar-item-highlight 2s ease-out 1;
 }
+
+  .markux-status-select {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .markux-status-select-chevron {
+    font-size: 10px;
+    opacity: 0.7;
+  }
+  .markux-status-select-popup {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 120px;
+  }
+  .markux-status-select-option {
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+  .markux-status-select-option-current {
+    outline: 2px solid #111827;
+    outline-offset: -2px;
+  }
 `;
