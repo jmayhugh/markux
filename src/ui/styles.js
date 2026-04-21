@@ -322,8 +322,13 @@ export const STYLES = `
   }
 
   .markux-status-open {
-    background: #fef3c7;
-    color: #92400e;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .markux-status-feedback {
+    background: #fef9c3;
+    color: #854d0e;
   }
 
   .markux-status-resolved {
