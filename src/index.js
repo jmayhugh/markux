@@ -265,6 +265,7 @@ import { handleDeepLink } from "./deep-link.js";
           }
         },
         closePopover,
+        (newStatus) => handleSidebarStatusChange(annotation, newStatus),
       );
 
       currentPopover = popover;

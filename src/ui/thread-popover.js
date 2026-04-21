@@ -1,6 +1,7 @@
 // src/ui/thread-popover.js
 
 import { getSavedIdentity, saveIdentity, createIdentityBar } from "./identity.js";
+import { createStatusSelect } from "./status-select.js";
 
 /**
  * Create a popover showing an existing annotation's comment thread.
@@ -9,6 +10,7 @@ import { getSavedIdentity, saveIdentity, createIdentityBar } from "./identity.js
  * @param {{ x: number, y: number }} position
  * @param {(replyData: { name: string, email: string, body: string }) => void} onReply
  * @param {() => void} onClose
+ * @param {(newStatus: string) => void} onStatusChange - Called when status changes via the dropdown
  */
 export function createThreadPopover(
   annotation,
@@ -16,6 +18,7 @@ export function createThreadPopover(
   position,
   onReply,
   onClose,
+  onStatusChange,
 ) {
   const popover = document.createElement("div");
   popover.className = "markux-popover";
@@ -29,10 +32,12 @@ export function createThreadPopover(
   const header = document.createElement("div");
   header.className = "markux-popover-header";
 
-  const statusSpan = document.createElement("span");
-  statusSpan.className = `markux-status ${annotation.status === "open" ? "markux-status-open" : "markux-status-resolved"}`;
-  statusSpan.textContent = annotation.status;
-  header.appendChild(statusSpan);
+  const statusSelect = createStatusSelect({
+    value: annotation.status,
+    onChange: onStatusChange,
+    root: popover,
+  });
+  header.appendChild(statusSelect);
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "markux-popover-close";
