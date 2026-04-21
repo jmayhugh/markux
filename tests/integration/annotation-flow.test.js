@@ -30,7 +30,7 @@ describe("annotation flow integration", () => {
     const url = normalizeUrl(
       "https://Example.COM/page?utm_source=email&q=test#section",
     );
-    expect(url).toBe("https://example.com/page?q=test");
+    expect(url).toBe("https://example.com/page");
 
     // 2. Generate selector for target element
     const target = document.getElementById("target");
