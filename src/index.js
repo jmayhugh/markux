@@ -209,8 +209,8 @@ import { handleDeepLink } from "./deep-link.js";
             pendingPin = null; // Pin is now committed
             annotation._replyCount = 0;
             addAnnotation(annotation);
-            updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status === "open").length);
-            updateSidebarList(sidebar, getAnnotations().filter((a) => a.status === "open"), sidebarCallbacks);
+            updateSidebarBadge(sidebar, getAnnotations().filter((a) => a.status !== "resolved").length);
+            updateSidebarList(sidebar, getAnnotations().filter((a) => a.status !== "resolved"), sidebarCallbacks);
 
             // Replace pin with one that has initials
             const newPin = createPinMarker(pinNumber, parseFloat(pin.style.left), parseFloat(pin.style.top), () => showThread(annotation, newPin), name);
@@ -324,10 +324,10 @@ import { handleDeepLink } from "./deep-link.js";
         pinContainer.removeChild(pinContainer.firstChild);
       }
 
-      // Sort: open first, resolved at bottom
+      // Sort: open → feedback → resolved
+      const statusOrder = { open: 0, feedback: 1, resolved: 2 };
       const annotations = (data || []).sort((a, b) => {
-        if (a.status === b.status) return 0;
-        return a.status === "open" ? -1 : 1;
+        return (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3);
       });
       if (annotations.length > 0) {
         const ids = annotations.map((a) => a.id);
@@ -363,7 +363,7 @@ import { handleDeepLink } from "./deep-link.js";
         pinContainer.appendChild(pin);
       });
 
-      updateSidebarBadge(sidebar, annotations.filter((a) => a.status === "open").length);
+      updateSidebarBadge(sidebar, annotations.filter((a) => a.status !== "resolved").length);
       updateSidebarList(sidebar, annotations, sidebarCallbacks);
 
       if (!deepLinkHandled) {
