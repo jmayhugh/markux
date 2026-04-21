@@ -18,11 +18,14 @@ describe("normalizeUrl", () => {
   it("strips ref parameter", () => {
     expect(normalizeUrl("https://example.com/?ref=twitter")).toBe("https://example.com/");
   });
-  it("preserves non-tracking query parameters", () => {
-    expect(normalizeUrl("https://example.com/search?q=test&page=2")).toBe("https://example.com/search?q=test&page=2");
+  it("strips all non-tracking query parameters too", () => {
+    expect(normalizeUrl("https://example.com/search?q=test&page=2")).toBe("https://example.com/search");
   });
-  it("strips tracking params but preserves others", () => {
-    expect(normalizeUrl("https://example.com/search?q=test&utm_source=email")).toBe("https://example.com/search?q=test");
+  it("strips a mix of tracking and non-tracking params", () => {
+    expect(normalizeUrl("https://example.com/search?q=test&utm_source=email")).toBe("https://example.com/search");
+  });
+  it("strips empty query string (trailing ?)", () => {
+    expect(normalizeUrl("https://example.com/search?")).toBe("https://example.com/search");
   });
   it("strips trailing slashes", () => {
     expect(normalizeUrl("https://example.com/about/")).toBe("https://example.com/about");
@@ -32,5 +35,8 @@ describe("normalizeUrl", () => {
   });
   it("lowercases the hostname", () => {
     expect(normalizeUrl("https://EXAMPLE.COM/About")).toBe("https://example.com/About");
+  });
+  it("preserves path case", () => {
+    expect(normalizeUrl("https://example.com/About?q=X#h")).toBe("https://example.com/About");
   });
 });
