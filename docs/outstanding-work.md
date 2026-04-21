@@ -8,6 +8,10 @@ Snapshot taken 2026-04-16, amended 2026-04-21 with the feedback-status work. Gro
 
 Reference only — shipped on `main` and live.
 
+- **URL normalization drops all query params.** `normalizeUrl` now clears `url.search` unconditionally; annotations on `/foo?q=x`, `/foo?q=y`, and `/foo` all group onto a single `/foo` thread. One-shot SQL backfill (`update annotations set page_url = split_part(page_url, '?', 1) where page_url like '%?%'`) migrated historical rows so old comments surface on the base URL.
+  - Spec: `docs/specs/2026-04-21-drop-query-params-in-url-normalize-design.md`
+  - Plan: `docs/superpowers/plans/2026-04-21-drop-query-params-in-url-normalize.md`
+
 - **Third annotation status: Feedback.** Added `feedback` to the `annotations.status` CHECK constraint (migration 003, applied via dashboard). Replaced the static status badge + separate Resolve/Reopen button with a custom colored-pill dropdown (`StatusSelect`) in both the admin and the embedded widget. Admin table loses the Reopen/Resolve action column, gains a Feedback filter option, and the Status header is no longer sortable. Widget gets a yellow pin variant for Feedback; sidebar badge counts Feedback as active. Palette shifted Open from amber to red to form a red/yellow/green traffic light with Resolved unchanged.
   - Spec: `docs/specs/2026-04-21-feedback-status-design.md`
   - Plan: `docs/superpowers/plans/2026-04-21-feedback-status.md`
