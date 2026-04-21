@@ -243,7 +243,7 @@ serve(async (req) => {
       result = { deleted: true };
     } else if (action === "update_annotation_status") {
       const { annotation_id, status: newStatus } = data;
-      if (!["open", "resolved"].includes(newStatus)) {
+      if (!["open", "feedback", "resolved"].includes(newStatus)) {
         return new Response(JSON.stringify({ error: "Invalid status" }), {
           status: 400,
           headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
