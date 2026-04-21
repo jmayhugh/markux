@@ -1,10 +1,21 @@
 # MarkUX — Outstanding Work
 
-Snapshot taken 2026-04-16. Groups open items by priority. Links point to specs/plans where they exist.
+Snapshot taken 2026-04-16, amended 2026-04-21 with the feedback-status work. Groups open items by priority. Links point to specs/plans where they exist.
 
 ---
 
-## Done today (2026-04-16)
+## Done 2026-04-21
+
+Reference only — shipped on `main` and live.
+
+- **Third annotation status: Feedback.** Added `feedback` to the `annotations.status` CHECK constraint (migration 003, applied via dashboard). Replaced the static status badge + separate Resolve/Reopen button with a custom colored-pill dropdown (`StatusSelect`) in both the admin and the embedded widget. Admin table loses the Reopen/Resolve action column, gains a Feedback filter option, and the Status header is no longer sortable. Widget gets a yellow pin variant for Feedback; sidebar badge counts Feedback as active. Palette shifted Open from amber to red to form a red/yellow/green traffic light with Resolved unchanged.
+  - Spec: `docs/specs/2026-04-21-feedback-status-design.md`
+  - Plan: `docs/superpowers/plans/2026-04-21-feedback-status.md`
+  - Migration: `supabase/migrations/003_add_feedback_status.sql` (applied via dashboard — same migration-tracking workaround as 002)
+
+---
+
+## Done 2026-04-16
 
 Reference only — these are shipped on `main` and live.
 
