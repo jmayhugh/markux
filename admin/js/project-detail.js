@@ -1,5 +1,6 @@
 // admin/js/project-detail.js
 import { getSupabase } from "./supabase-client.js";
+import { createStatusSelect } from "./components/status-select.js";
 
 export async function loadProject(projectId) {
   const supabase = getSupabase();
@@ -131,30 +132,17 @@ export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {
       ? annotation.comment.slice(0, 60) + "..."
       : annotation.comment;
 
-  // Status cell
+  // Status cell (interactive dropdown)
   const statusCell = document.createElement("td");
-  const statusSpan = document.createElement("span");
-  statusSpan.className = `status ${annotation.status === "open" ? "status-open" : "status-resolved"}`;
-  statusSpan.textContent = annotation.status;
-  statusCell.appendChild(statusSpan);
+  const statusSelect = createStatusSelect({
+    value: annotation.status,
+    onChange: (newStatus) => onStatusToggle(annotation.id, newStatus),
+  });
+  statusCell.appendChild(statusSelect);
 
   // Date cell
   const dateCell = document.createElement("td");
   dateCell.textContent = new Date(annotation.created_at).toLocaleDateString();
-
-  // Action cell
-  const actionCell = document.createElement("td");
-  const toggleBtn = document.createElement("button");
-  toggleBtn.className = "btn btn-sm btn-secondary toggle-status";
-  toggleBtn.textContent = annotation.status === "open" ? "Resolve" : "Reopen";
-  toggleBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    onStatusToggle(
-      annotation.id,
-      annotation.status === "open" ? "resolved" : "open",
-    );
-  });
-  actionCell.appendChild(toggleBtn);
 
   // View-in-context cell
   const viewCell = document.createElement("td");
@@ -172,11 +160,10 @@ export function renderAnnotationRow(annotation, onExpand, onStatusToggle) {
   tr.appendChild(statusCell);
   tr.appendChild(authorCell);
   tr.appendChild(dateCell);
-  tr.appendChild(actionCell);
   tr.appendChild(viewCell);
 
   tr.addEventListener("click", (e) => {
-    if (e.target.closest(".toggle-status")) return;
+    if (e.target.closest(".status-select") || e.target.closest(".status-select-popup")) return;
     onExpand(annotation);
   });
 
