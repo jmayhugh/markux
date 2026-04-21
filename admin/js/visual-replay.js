@@ -114,7 +114,7 @@ function renderAnnotation(container, annotations, supabaseUrl) {
   authorEmail.style.marginLeft = "8px";
   authorEmail.textContent = ann.author_email;
   const statusEl = document.createElement("span");
-  statusEl.className = `status ${ann.status === "open" ? "status-open" : "status-resolved"}`;
+  statusEl.className = `status status-${ann.status}`;
   statusEl.style.marginLeft = "8px";
   statusEl.textContent = ann.status;
   authorLine.appendChild(authorStrong);
