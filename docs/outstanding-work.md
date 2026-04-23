@@ -4,6 +4,16 @@ Snapshot taken 2026-04-16, amended 2026-04-21 with the feedback-status work. Gro
 
 ---
 
+## Done 2026-04-23
+
+Reference only — shipped on `main` and live.
+
+- **Hide MarkUX overlay from the frontend.** Site owners can hide the entire overlay on any site with one click on a small gray eye-off button above the pen FAB. Hidden state persists in `localStorage` on the embed origin. A 10px translucent ghost dot in the bottom-right restores the full overlay with one click (reload-on-toggle keeps state management trivial).
+  - Spec: `docs/specs/2026-04-23-hide-overlay-design.md`
+  - Plan: `docs/superpowers/plans/2026-04-23-hide-overlay.md`
+
+---
+
 ## Done 2026-04-21
 
 Reference only — shipped on `main` and live.

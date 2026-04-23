@@ -14,6 +14,20 @@ Embeddable website annotation tool for collecting visual design feedback. Add on
 - **Admin app** for project management, filtering, CSV export, and visual replay
 - **Self-hosted** — runs on Supabase free tier, no SaaS dependency
 
+## Hide MarkUX on a site
+
+Once installed, MarkUX can be hidden from a site by clicking the small gray "eye-off" button directly above the pen FAB. The entire overlay — FAB, pins, sidebar, mode label — disappears and is replaced by a small translucent dot in the bottom-right corner. Click the dot to restore.
+
+The preference lives in `localStorage` on the site's origin, so it persists across reloads until you restore it. It's per-browser — other browsers and devices still see the full overlay.
+
+If MarkUX ever gets stuck hidden and the ghost dot doesn't render for some reason, open DevTools on the site and run:
+
+```js
+localStorage.removeItem("markux:hidden");
+```
+
+Then reload.
+
 ## Quick Start
 
 ### 1. Set up Supabase
