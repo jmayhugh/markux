@@ -47,3 +47,25 @@ export function updateBadge(button, count) {
     button.appendChild(badge);
   }
 }
+
+export function createHideButton(onClick) {
+  const button = document.createElement("button");
+  button.className = "markux-hide-btn";
+  button.setAttribute("aria-label", "Hide MarkUX");
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("fill", "currentColor");
+
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute(
+    "d",
+    "M3.28 2.22a.75.75 0 00-1.06 1.06l2.14 2.14A10.45 10.45 0 001 12s3.5 7 11 7c1.89 0 3.58-.41 5.04-1.08l3.68 3.68a.75.75 0 101.06-1.06L3.28 2.22zm6.07 7.13l5.3 5.3a3 3 0 01-5.3-5.3zM12 5c-1.2 0-2.32.16-3.34.44l2.1 2.1A3 3 0 0114.46 10.7l2.77 2.77c1.06-.78 1.97-1.76 2.77-2.97-1.42-2.2-4.21-5.5-8-5.5z"
+  );
+  svg.appendChild(path);
+  button.appendChild(svg);
+
+  button.addEventListener("click", onClick);
+  return button;
+}
