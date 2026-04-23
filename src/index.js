@@ -12,7 +12,8 @@ import {
 import { createAnnotation, createReply, deleteAnnotation, updateAnnotationStatus, uploadScreenshot, setApiKey } from "./api.js";
 import { captureScreenshot } from "./screenshot.js";
 import { STYLES } from "./ui/styles.js";
-import { createFloatingButton } from "./ui/floating-button.js";
+import { createFloatingButton, createHideButton } from "./ui/floating-button.js";
+import { isHidden, setHidden, createGhostDot } from "./ui/visibility.js";
 import {
   createOverlay,
   createHighlight,
@@ -53,6 +54,24 @@ import { handleDeepLink } from "./deep-link.js";
   const pageUrl = normalizeUrl(window.location.href);
 
   function init() {
+    if (isHidden()) {
+      const host = document.createElement("div");
+      host.id = "markux-host";
+      document.body.appendChild(host);
+      const shadow = host.attachShadow({ mode: "closed" });
+
+      const style = document.createElement("style");
+      style.textContent = STYLES;
+      shadow.appendChild(style);
+
+      const dot = createGhostDot(() => {
+        setHidden(false);
+        window.location.reload();
+      });
+      shadow.appendChild(dot);
+      return;
+    }
+
     setApiKey(supabaseAnonKey);
     const supabase = initSupabase(supabaseUrl, supabaseAnonKey);
 
@@ -75,6 +94,12 @@ import { handleDeepLink } from "./deep-link.js";
     shadow.appendChild(highlight);
     shadow.appendChild(overlay);
     shadow.appendChild(fab);
+
+    const hideBtn = createHideButton(() => {
+      setHidden(true);
+      window.location.reload();
+    });
+    shadow.appendChild(hideBtn);
 
     // Comment mode label
     const modeLabel = document.createElement("div");
