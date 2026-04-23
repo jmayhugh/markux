@@ -71,6 +71,58 @@ export const STYLES = `
     background: #6366f1;
   }
 
+  /* Hide button — sits above the FAB */
+  .markux-hide-btn {
+    position: fixed;
+    bottom: 158px;
+    right: 42px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #6b7280;
+    border: 2px solid white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 2147483647;
+    transition: transform 0.15s ease, background 0.15s ease;
+    padding: 0;
+  }
+
+  .markux-hide-btn:hover {
+    transform: scale(1.08);
+    background: #4b5563;
+  }
+
+  .markux-hide-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
+  }
+
+  /* Ghost dot — only element shown when overlay is hidden */
+  .markux-ghost-dot {
+    position: fixed;
+    bottom: 119px;
+    right: 53px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    z-index: 2147483647;
+  }
+
+  .markux-ghost-dot:focus-visible {
+    background: rgba(0, 0, 0, 1);
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
   /* Annotation mode overlay */
   .markux-overlay {
     position: fixed;
